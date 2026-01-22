@@ -1,0 +1,151 @@
+/* Font Import */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;600;800;900&family=Inter:wght@400;500;600;800&display=swap');
+
+/* --- FLOAT BUBBLE --- */
+#casseroles-float-bubble {
+    position: absolute;
+    background: #2d3436;
+    color: #ffffff;
+    padding: 10px 18px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+    z-index: 999998;
+    display: none;
+    font-size: 15px;
+    font-family: "Fraunces", serif;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    pointer-events: auto;
+    transform-origin: bottom center;
+    animation: floatPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes floatPop {
+    0% {
+        transform: scale(0.5) translateY(20px);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+/* --- HIGHLIGHTER --- */
+.casseroles-rough-highlight {
+    position: relative;
+    white-space: nowrap;
+    cursor: pointer;
+    z-index: 10;
+    color: inherit !important;
+    border-bottom: 3px solid #feca57 !important;
+    /* Force visibility */
+    padding-bottom: 0px;
+    font-weight: 800;
+    font-size: 1.1em;
+    letter-spacing: -0.02em;
+    transition: color 0.2s ease;
+    text-decoration: none !important;
+    /* Ensure no conflict with link underlines */
+    display: inline-block;
+    /* Ensure borders render correctly */
+    line-height: 1.2;
+}
+
+.casseroles-rough-highlight::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    top: 0px;
+    left: -4px;
+    right: -4px;
+    bottom: 2px;
+    background: #fff4d3;
+    border-radius: 4px;
+    transform-origin: left center;
+    transform: scaleX(0);
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+    opacity: 1;
+}
+
+.casseroles-rough-highlight:hover {
+    color: #2d3436 !important;
+}
+
+.casseroles-rough-highlight:hover::before {
+    transform: scaleX(1);
+}
+
+/* --- MODAL --- */
+#casseroles-modal {
+    position: fixed;
+    background: #fffbf2;
+    color: #2d3436;
+    border-radius: 20px;
+    box-shadow: 0 25px 90px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    z-index: 999999;
+    display: none;
+    width: 460px;
+    max-height: 90vh;
+    font-family: "Fraunces", serif;
+    flex-direction: column;
+    overflow: hidden;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    opacity: 0;
+    transform: scale(0.98);
+}
+
+.casseroles-pot-blend {
+    width: 140px;
+    height: 140px;
+    object-fit: contain;
+    transform: rotate(-5deg);
+    mix-blend-mode: multiply !important;
+    display: block;
+}
+
+/* Scrollbar */
+#casseroles-items-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+#casseroles-items-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#casseroles-items-container::-webkit-scrollbar-thumb {
+    background: #dfe6e9;
+    border-radius: 3px;
+}
+
+#casseroles-items-container::-webkit-scrollbar-thumb:hover {
+    background: #b2bec3;
+}
+
+/* --- FOOTER REPORT --- */
+.casseroles-modal-footer {
+    padding: 15px 30px;
+    border-top: 1px solid rgba(0, 0, 0, 0.03);
+    text-align: center;
+    background: #fffbef;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+}
+
+.casseroles-report-link {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    color: #b2bec3;
+    text-decoration: none;
+    transition: color 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.casseroles-report-link:hover {
+    color: #ff6b35;
+    text-decoration: underline;
+}

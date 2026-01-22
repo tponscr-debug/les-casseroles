@@ -1,0 +1,17 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Flame background -->
+  <path d="M64 120C94.9279 120 120 94.9279 120 64C120 33.0721 94.9279 8 64 8C33.0721 8 8 33.0721 8 64C8 94.9279 33.0721 120 64 120Z" fill="#2d3436"/>
+  <!-- Pot Body -->
+  <path d="M34 50H94V85C94 93.2843 87.2843 100 79 100H49C40.7157 100 34 93.2843 34 85V50Z" fill="#d63031"/>
+  <path d="M34 56H94V62H34V56Z" fill="#ff7675"/>
+  <!-- Lid / Content -->
+  <path d="M32 44H96V50H32V44Z" fill="#636e72"/>
+  <path d="M60 38H68V44H60V38Z" fill="#2d3436"/>
+  <!-- Steam -->
+  <path d="M80 30C82 20 90 20 88 35" stroke="#ffeaa7" stroke-width="3" stroke-linecap="round"/>
+  <path d="M48 35C46 25 38 25 40 40" stroke="#ffeaa7" stroke-width="3" stroke-linecap="round"/>
+  <!-- Emoji Look -->
+  <circle cx="54" cy="75" r="3" fill="#fab1a0"/>
+  <circle cx="74" cy="75" r="3" fill="#fab1a0"/>
+  <path d="M54 85C54 85 60 90 64 90C68 90 74 85 74 85" stroke="#fab1a0" stroke-width="3" stroke-linecap="round"/>
+</svg>
