@@ -323,20 +323,60 @@ document.addEventListener('click', (e) => {
 
 // --- CHARGEMENT & INIT ---
 
+const REMOTE_URL = 'https://raw.githubusercontent.com/tponscr-debug/les-casseroles/main/data/encyclopedia.json';
+const CACHE_TTL  = 24 * 60 * 60 * 1000; // 24h
+
+const buildMap = (data) => {
+    politiciansMap.clear();
+    Object.keys(data).forEach(key => {
+        const entry = data[key];
+        if (entry.timeline && entry.timeline.length > 0) {
+            politiciansMap.set(normalize(key), entry);
+        }
+    });
+    console.log(`Les Casseroles: ${politiciansMap.size} profils chargés.`);
+};
+
 const loadPoliticians = async () => {
+    // 1. Vérifier le cache local (chrome.storage.local)
+    const cached = await chrome.storage.local.get(['encyclopediaData', 'encyclopediaCachedAt']);
+    const now = Date.now();
+    const cacheAge = now - (cached.encyclopediaCachedAt || 0);
+
+    if (cached.encyclopediaData && cacheAge < CACHE_TTL) {
+        buildMap(cached.encyclopediaData);
+        return;
+    }
+
+    // 2. Essayer de fetcher la version distante (GitHub)
     try {
-        const url = chrome.runtime.getURL('casseroles_encyclopedia.json');
-        const data = await (await fetch(url)).json();
-        // FIX: exclure les politiques sans aucune casserole de la Map (pas de sursurlignage inutile)
-        Object.keys(data).forEach(key => {
-            const entry = data[key];
-            if (entry.timeline && entry.timeline.length > 0) {
-                politiciansMap.set(normalize(key), entry);
-            }
-        });
-        console.log(`Les Casseroles: ${politiciansMap.size} politiques chargés avec des affaires.`);
+        const resp = await fetch(REMOTE_URL, { cache: 'no-store' });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const data = await resp.json();
+        // Mettre en cache
+        await chrome.storage.local.set({ encyclopediaData: data, encyclopediaCachedAt: now });
+        buildMap(data);
+        console.log('Les Casseroles: données à jour depuis GitHub.');
+        return;
     } catch (e) {
-        console.error('Les Casseroles: Échec du chargement de l\'encyclopédie', e);
+        console.warn('Les Casseroles: fetch GitHub échoué, fallback.', e.message);
+    }
+
+    // 3. Fallback sur le cache périmé s'il existe
+    if (cached.encyclopediaData) {
+        buildMap(cached.encyclopediaData);
+        console.warn('Les Casseroles: données du cache (périmé).');
+        return;
+    }
+
+    // 4. Dernier recours : fichier bundlé
+    try {
+        const url = chrome.runtime.getURL('data/encyclopedia.json');
+        const data = await (await fetch(url)).json();
+        buildMap(data);
+        console.log('Les Casseroles: données bundlées utilisées.');
+    } catch (e) {
+        console.error('Les Casseroles: impossible de charger les données.', e);
     }
 };
 

@@ -46,7 +46,7 @@
     "web_accessible_resources": [
         {
             "resources": [
-                "casseroles_encyclopedia.json",
+                "data/encyclopedia.json",
                 "icon_final.png",
                 "casserole_v3.png"
             ],
