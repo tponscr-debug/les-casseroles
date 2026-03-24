@@ -1,17 +1,30 @@
 {
     "manifest_version": 3,
     "name": "Les Casseroles",
-    "version": "1.9",
-    "description": "Révèle le casier judiciaire des politiques français via l'IA.",
+    "version": "2.0",
+    "description": "Révèle le casier judiciaire des politiques français sur n'importe quelle page.",
     "icons": {
         "16": "icon_final.png",
         "48": "icon_final.png",
         "128": "icon_final.png"
     },
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": {
+            "16": "icon_final.png",
+            "48": "icon_final.png",
+            "128": "icon_final.png"
+        },
+        "default_title": "Les Casseroles"
+    },
+    "background": {
+        "service_worker": "background.js"
+    },
     "permissions": [
         "activeTab",
         "storage",
-        "scripting"
+        "scripting",
+        "tabs"
     ],
     "host_permissions": [
         "<all_urls>"
