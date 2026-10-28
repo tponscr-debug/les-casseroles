@@ -27,3 +27,11 @@ hr { border: 0; border-top: 2px dashed var(--fade); margin: 11px 0; opacity: 0.7
 .barcode { height: 30px; margin: 10px auto 2px; width: 78%; background: repeating-linear-gradient(90deg, var(--ink) 0 2px, #0000 2px 4px, var(--ink) 4px 5px, #0000 5px 9px, var(--ink) 9px 12px, #0000 12px 14px); }
 .reply { margin-top: 8px; font-size: 10.5px; }
 .reply a { color: var(--ink); text-decoration: underline wavy var(--fade); text-underline-offset: 3px; }
+
+.site { margin-top: 12px; }
+.site b { font-size: 12px; letter-spacing: 0.04em; }
+.why { margin: 2px 0 0; font-size: 10.5px; color: var(--fade); min-height: 14px; }
+.site-btn { width: 100%; margin-top: 6px; padding: 8px; border: 2px dashed var(--ink); background: transparent; color: var(--ink); font: 700 11px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; }
+.site-btn:hover { background: var(--ink); color: var(--paper); border-style: solid; }
+.site-btn:focus-visible { outline: 2px solid var(--stamp); outline-offset: 2px; }
+.site-btn[hidden] { display: none; }

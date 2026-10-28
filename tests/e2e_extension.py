@@ -24,14 +24,16 @@ def check(name, cond, detail=""):
 def serve():
     handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=str(FIX))
     handler.log_message = lambda *a, **k: None
-    socketserver.TCPServer.allow_reuse_address = True
-    srv = socketserver.TCPServer(("127.0.0.1", PORT), handler)
+    socketserver.ThreadingTCPServer.allow_reuse_address = True
+    socketserver.ThreadingTCPServer.daemon_threads = True      # Chrome ouvre des connexions spéculatives : un serveur mono-thread se bloque
+    srv = socketserver.ThreadingTCPServer(("127.0.0.1", PORT), handler)
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     return srv
 
 def launch(p, user_dir):
     return p.chromium.launch_persistent_context(user_dir, channel="chromium", headless=True, args=[
-        f"--disable-extensions-except={ROOT}", f"--load-extension={ROOT}", "--headless=new"])
+        f"--disable-extensions-except={ROOT}", f"--load-extension={ROOT}", "--headless=new",
+        "--host-resolver-rules=MAP netflix.com 127.0.0.1,MAP *.test 127.0.0.1"])
 
 def sw_of(ctx):
     return ctx.service_workers[0] if ctx.service_workers else ctx.wait_for_event("serviceworker", timeout=15000)
@@ -42,7 +44,8 @@ def tab_msg(sw, msg):
 
 def main():
     srv = serve()
-    url = f"http://127.0.0.1:{PORT}/article.html"
+    base = f"http://casseroles.test:{PORT}"
+    url = f"{base}/article.html"
     with sync_playwright() as p:
         # ── 1. données réelles (bundle) ───────────────────────────────────────
         ctx = launch(p, tempfile.mkdtemp()); sw = sw_of(ctx)
@@ -127,6 +130,33 @@ def main():
         check("XSS : aucun <img> injecté dans la modale", page.locator("#casseroles-modal img[src='x']").count() == 0)
         check("XSS : aucun script exécuté dans la page", page.evaluate("window.__xss") is None)
         check("XSS : lien javascript: non rendu", page.locator("#casseroles-modal a[href^='javascript']").count() == 0)
+        ctx.close()
+
+        # ── 7. exclusion par site : jeux, streaming, dev local ───────────────────
+        ctx = launch(p, tempfile.mkdtemp()); sw = sw_of(ctx)
+        ctx.route("https://raw.githubusercontent.com/**", lambda r: r.abort())
+        page = ctx.new_page()
+        count = lambda: page.locator(".casseroles-rough-highlight").count()
+        page.goto(f"http://netflix.com:{PORT}/article.html"); time.sleep(2)
+        st = tab_msg(sw, {"action": "getStats"})
+        check("exclusion : netflix.com exclu par défaut (0 surlignage)", count() == 0 and st["excluded"] and st["reason"] == "default", str(st))
+        check("exclusion : aucune UI posée sur un site exclu", page.locator("#casseroles-host").count() == 0)
+        page.goto(f"http://127.0.0.1:{PORT}/article.html"); time.sleep(2)
+        check("exclusion : localhost / 127.0.0.1 exclus par défaut (tes jeux et prototypes)", count() == 0 and tab_msg(sw, {"action": "getStats"})["reason"] == "default")
+        page.goto(f"{base}/game.html"); time.sleep(2)
+        st = tab_msg(sw, {"action": "getStats"})
+        check("exclusion : un jeu inconnu (canvas plein écran) est détecté", count() == 0 and st["excluded"] and st["reason"] == "game", str(st))
+        page.goto(url); page.wait_for_selector(".casseroles-rough-highlight", timeout=10000)
+        check("exclusion : un site d'actualité reste actif", tab_msg(sw, {"action": "getStats"})["reason"] == "active")
+        tab_msg(sw, {"action": "setSite", "mode": "exclude"}); time.sleep(0.6)
+        check("exclusion : « exclure ce site » retire les surlignages sans recharger", count() == 0)
+        page.reload(); time.sleep(2)
+        check("exclusion : le choix persiste après rechargement", count() == 0 and tab_msg(sw, {"action": "getStats"})["reason"] == "user")
+        tab_msg(sw, {"action": "setSite", "mode": "allow"}); page.wait_for_selector(".casseroles-rough-highlight", timeout=10000)
+        check("exclusion : « réactiver » rallume sans recharger", count() >= 3)
+        page.goto(f"http://netflix.com:{PORT}/article.html"); time.sleep(1.5)
+        tab_msg(sw, {"action": "setSite", "mode": "allow"}); page.wait_for_selector(".casseroles-rough-highlight", timeout=10000)
+        check("exclusion : un site exclu d'office peut être réactivé à la main", count() >= 3)
         ctx.close()
 
         # ── 6. extension rechargée : l'onglet déjà ouvert garde un script ORPHELIN (bug vu sur localhost:4800) ──

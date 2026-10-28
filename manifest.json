@@ -35,6 +35,7 @@
                 "js/text.js",
                 "js/matcher.js",
                 "js/data.js",
+                "js/sites.js",
                 "js/copy.js",
                 "js/context.js",
                 "js/ui-render.js",

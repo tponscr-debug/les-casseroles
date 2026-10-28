@@ -21,7 +21,9 @@
         empty: 'Note à zéro. Le serveur soupçonne une erreur de caisse.',
         popup: { on: 'Caisse ouverte', off: 'Caisse fermée', pageLabel: 'NOMS SUR CETTE PAGE', totalLabel: 'DOSSIERS EN BASE',
                  none: 'Rien à facturer ici.', off_text: 'Caisse fermée : on ne facture plus.', idle: 'Impression du ticket…',
-                 count: (n) => `${n} note${n > 1 ? 's' : ''} sur cette page.`, thanks: "Revenez quand c'est prescrit.", inactive: 'Pas encore actif sur cette page.' },
+                 count: (n) => `${n} note${n > 1 ? 's' : ''} sur cette page.`, excluded: 'Site rayé de la carte : rien à facturer.',
+                 siteLabel: 'CE SITE', siteOn: 'À LA CARTE', siteOff: 'RAYÉ DE LA CARTE', btnExclude: 'Rayer ce site de la carte', btnAllow: 'Remettre au menu',
+                 why: { default: 'jeu, streaming… exclu d’office', game: 'ressemble à un jeu : exclu d’office', user: 'exclu par vous' }, thanks: "Revenez quand c'est prescrit.", inactive: 'Pas encore actif sur cette page.' },
     };
 
     const SERIOUS = {
@@ -39,7 +41,9 @@
         empty: 'Aucune affaire vérifiée à ce jour.',
         popup: { on: 'Activée', off: 'Désactivée', pageLabel: 'NOMS SUR CETTE PAGE', totalLabel: 'DOSSIERS EN BASE',
                  none: 'Aucun nom répertorié ici.', off_text: 'Extension désactivée.', idle: 'Analyse en cours…',
-                 count: (n) => `${n} nom${n > 1 ? 's' : ''} surligné${n > 1 ? 's' : ''} sur cette page.`, thanks: 'Sources citées sur chaque fiche.', inactive: 'Pas encore actif sur cette page.' },
+                 count: (n) => `${n} nom${n > 1 ? 's' : ''} surligné${n > 1 ? 's' : ''} sur cette page.`, excluded: 'Site exclu : aucun nom surligné.',
+                 siteLabel: 'SITE', siteOn: 'ACTIF', siteOff: 'EXCLU', btnExclude: 'Exclure ce site', btnAllow: 'Réactiver ce site',
+                 why: { default: 'jeu, streaming… exclu par défaut', game: 'ressemble à un jeu : exclu par défaut', user: 'exclu par vous' }, thanks: 'Sources citées sur chaque fiche.', inactive: 'Pas encore actif sur cette page.' },
     };
 
     const get = (humor) => (humor === 'serious' ? SERIOUS : FUNNY);

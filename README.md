@@ -7,6 +7,9 @@ Extension Chrome (Manifest V3) : surligne les noms de responsables politiques fr
 ## Installer (développement)
 `chrome://extensions` → mode développeur → « Charger l'extension non empaquetée » → ce dossier.
 
+## Sites exclus
+Jeux, streaming et dev local sont exclus **d'office** (Netflix, Prime Video, Disney+, Max, YouTube, Twitch, Spotify, itch.io, `localhost`, `127.0.0.1`, `*.local`…, liste dans `js/sites.js`), et tout jeu inconnu est détecté (canvas plein écran + peu de texte). Sur un site exclu, rien n'est chargé ni observé. Le popup permet d'exclure ou de réactiver le site courant.
+
 ## Données
 - `data/encyclopedia.json` : base (schéma v3, voir `PRP.md`). Servie via GitHub (`main`), cache 24 h, repli embarqué.
 - `data/review_queue.md` : ce qu'un humain doit trancher.

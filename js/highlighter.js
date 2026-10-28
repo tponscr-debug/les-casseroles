@@ -2,7 +2,7 @@
 // Perf : une regex unique ; on ne scanne que les nœuds AJOUTÉS ; on ignore nos propres mutations.
 (() => {
     const NS = (globalThis.Casseroles = globalThis.Casseroles || {});
-    const { state } = NS.data;
+    const { state, isActive } = NS.data;
     const { normalize } = NS.text;
     const { buildMatcher, findMatches } = NS.matcher;
     const ui = NS.ui;
@@ -79,7 +79,7 @@
     };
 
     const scan = (root) => {
-        if (!state.enabled || !regex || !root || !root.isConnected || !ctx.check()) return;
+        if (!isActive() || !regex || !root || !root.isConnected || !ctx.check()) return;
         if (root.nodeType === Node.TEXT_NODE) return processTextNode(root);
         if (root.nodeType !== Node.ELEMENT_NODE || isOurs(root)) return;
         const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
@@ -101,7 +101,7 @@
     };
 
     const onMutations = (mutations) => {
-        if (!state.enabled || !ctx.check()) return;
+        if (!isActive() || !ctx.check()) return;
         for (const m of mutations) {
             for (const n of m.addedNodes) {
                 if ((n.nodeType === 1 || n.nodeType === 3) && !isOurs(n)) pending.add(n);
@@ -140,7 +140,7 @@
         rebuild();
         observer = new MutationObserver(onMutations);
         observer.observe(document.body || document.documentElement, { childList: true, subtree: true });
-        if (state.enabled) enable();
+        if (isActive()) enable();
     };
 
     NS.highlighter = { init, enable, disable, count: countHighlights, rebuild };

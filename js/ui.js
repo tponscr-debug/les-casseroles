@@ -2,7 +2,7 @@
 // Le CSS du site hôte ne peut pas casser l'UI, et nos styles ne fuient pas dans la page.
 (() => {
     const NS = (globalThis.Casseroles = globalThis.Casseroles || {});
-    const { state } = NS.data;
+    const { state, isActive } = NS.data;
     const { renderModal } = NS.render;
     const { bubble: bubbleText } = NS.copy;
     const ctx = NS.context;
@@ -50,7 +50,7 @@
     };
 
     const showFloat = (element, name) => {
-        if (!state.enabled || !ensureHost()) return;
+        if (!isActive() || !ensureHost()) return;
         bubble.dataset.name = name;
         stub.textContent = bubbleText(state.humor, name);
         bubble.style.display = 'block';

@@ -5,7 +5,9 @@
     const NS = (globalThis.Casseroles = globalThis.Casseroles || {});
     const { normalize } = NS.text;
 
-    const state = { map: new Map(), enabled: true, firstOnly: false, humor: 'funny', meta: null };
+    const state = { map: new Map(), enabled: true, excluded: false, firstOnly: false, humor: 'funny', meta: null };
+    // Actif = activé par l'utilisateur ET site non exclu (jeux, streaming, liste perso).
+    const isActive = () => state.enabled && !state.excluded;
     const LEGAL = new Set(['condamne', 'mis_en_examen', 'renvoye', 'relaxe', 'non_lieu', 'enquete', 'mise_en_cause']);
     const LEGAL_TITLE = /condamn|coupable|relax|acquitt|non-?lieu|mis(e)? en examen|renvoy|inéligib|garde à vue|perquisition|plainte|parquet|enquête|information judiciaire|instruction|procès|tribunal|cassation|sursis|prison|amende|accus|soupçon|mise? en cause|détourn|fraud|corrupt|escroqu|abus de|favoritisme|harcèlement|agression|violence/i;
 
@@ -64,5 +66,5 @@
         }
     };
 
-    NS.data = { state, LEGAL, isDisplayable, affairsOf, buildMap, isValidEncyclopedia, loadPoliticians };
+    NS.data = { state, isActive, LEGAL, isDisplayable, affairsOf, buildMap, isValidEncyclopedia, loadPoliticians };
 })();

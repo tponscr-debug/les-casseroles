@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const C = require('./load.js');
-const { text, matcher, data, render } = C;
+const { text, matcher, data, render, sites } = C;
 
 test('toTitleCase gère accents, tirets, particules', () => {
     assert.equal(text.toTitleCase('élisabeth BORNE'), 'Élisabeth Borne');
@@ -134,4 +134,38 @@ test('context : sans chrome.* le contexte est mort ; le démontage est notifié 
     assert.equal(C.context.check(), false);
     assert.equal(calls, 1);
     assert.equal(C.context.isDead(), true);
+});
+
+// ── Exclusion par site ──
+const reason = (host, lists = {}, doc = null) => sites.decide(host, lists, doc, { innerWidth: 1000, innerHeight: 800 }).reason;
+const fakeDoc = (canvasW, canvasH, textLen) => ({
+    querySelectorAll: () => (canvasW ? [{ getBoundingClientRect: () => ({ width: canvasW, height: canvasH }) }] : []),
+    body: { innerText: 'x'.repeat(textLen) },
+});
+test('sites : streaming, jeux et dev local exclus par défaut (sous-domaines compris)', () => {
+    for (const h of ['netflix.com', 'www.netflix.com', 'www.primevideo.com', 'm.youtube.com', 'localhost', '127.0.0.1', 'monjeu.local', 'foo.itch.io'])
+        assert.equal(reason(h), 'default', h);
+});
+test('sites : sites d\'actualité actifs ; pas de faux positif sur un nom proche', () => {
+    for (const h of ['lemonde.fr', 'www.lefigaro.fr', 'fr.wikipedia.org', 'notnetflix.com', 'netflix.com.evil.fr'])
+        assert.equal(reason(h), 'active', h);
+});
+test('sites : l\'utilisateur gagne (réactiver > exclure > défaut)', () => {
+    assert.equal(reason('www.netflix.com', { sitesAllowed: ['netflix.com'] }), 'user-allow');
+    assert.equal(reason('lemonde.fr', { sitesExcluded: ['lemonde.fr'] }), 'user');
+    assert.equal(reason('lemonde.fr', { sitesAllowed: ['lemonde.fr'], sitesExcluded: ['lemonde.fr'] }), 'user-allow');
+});
+test('sites : détection d\'un jeu (canvas plein écran, peu de texte) sans exclure une page de contenu', () => {
+    assert.equal(reason('monsite.fr', {}, fakeDoc(1000, 800, 120)), 'game');
+    assert.equal(reason('monsite.fr', {}, fakeDoc(1000, 800, 5000)), 'active');      // beaucoup de texte : article avec carte
+    assert.equal(reason('monsite.fr', {}, fakeDoc(300, 200, 120)), 'active');        // petit canvas : graphique
+    assert.equal(reason('monsite.fr', {}, fakeDoc(0, 0, 120)), 'active');            // pas de canvas
+    assert.equal(reason('monsite.fr', { sitesAllowed: ['monsite.fr'] }, fakeDoc(1000, 800, 120)), 'user-allow');
+});
+test('sites : update exclut/réactive sans muter et sans doublon', () => {
+    const a = sites.update({ sitesAllowed: ['a.fr'], sitesExcluded: [] }, 'www.b.fr', 'exclude');
+    assert.deepEqual(a, { sitesExcluded: ['b.fr'], sitesAllowed: ['a.fr'] });
+    const b = sites.update(a, 'b.fr', 'allow');
+    assert.deepEqual(b, { sitesAllowed: ['a.fr', 'b.fr'], sitesExcluded: [] });
+    assert.deepEqual(sites.update(b, 'b.fr', 'allow').sitesAllowed, ['a.fr', 'b.fr']);
 });
