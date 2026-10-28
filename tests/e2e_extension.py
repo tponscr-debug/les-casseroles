@@ -128,6 +128,22 @@ def main():
         check("XSS : aucun script exécuté dans la page", page.evaluate("window.__xss") is None)
         check("XSS : lien javascript: non rendu", page.locator("#casseroles-modal a[href^='javascript']").count() == 0)
         ctx.close()
+
+        # ── 6. extension rechargée : l'onglet déjà ouvert garde un script ORPHELIN (bug vu sur localhost:4800) ──
+        ctx = launch(p, tempfile.mkdtemp()); sw = sw_of(ctx)
+        ctx.route("https://raw.githubusercontent.com/**", lambda r: r.abort())
+        errs = []
+        page = ctx.new_page(); page.on("pageerror", lambda e: errs.append(str(e)))
+        page.goto(url); page.wait_for_selector(".casseroles-rough-highlight", timeout=10000)
+        page.locator("#p1 .casseroles-rough-highlight").first.click(); page.wait_for_selector("#casseroles-modal", state="visible")
+        try: sw.evaluate("chrome.runtime.reload()")
+        except Exception: pass
+        time.sleep(2.5)
+        page.evaluate("document.body.insertAdjacentHTML('beforeend','<p>Encore Adrien Quatennens.</p>')"); time.sleep(1.5)
+        check("rechargement : aucune erreur (Extension context invalidated, null…)", not errs, str(errs))
+        check("rechargement : surlignages orphelins retirés", page.locator(".casseroles-rough-highlight").count() == 0)
+        check("rechargement : UI orpheline retirée", page.locator("#casseroles-host").count() == 0)
+        ctx.close()
     srv.shutdown()
     failed = [n for n, ok in results if not ok]
     print(f"\n{len(results) - len(failed)}/{len(results)} vérifications OK")

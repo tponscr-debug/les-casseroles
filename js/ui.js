@@ -5,42 +5,52 @@
     const { state } = NS.data;
     const { renderModal } = NS.render;
     const { bubble: bubbleText } = NS.copy;
+    const ctx = NS.context;
 
     const REPO = 'https://github.com/tponscr-debug/les-casseroles';
     let host = null, root = null, bubble = null, stub = null, modal = null, lastFocus = null;
 
+    // Construit TOUT avant d'assigner l'état : un échec en cours de route ne laisse jamais une UI à moitié montée.
     const ensureHost = () => {
-        if (host) return;
-        host = document.createElement('div');
-        host.id = 'casseroles-host';
-        host.style.cssText = 'all:initial;position:fixed;top:0;left:0;width:0;height:0;z-index:2147483646;';
-        root = host.attachShadow({ mode: 'open' });
+        if (host) return true;
+        if (!ctx.check()) return false;
+        const h = document.createElement('div');
+        h.id = 'casseroles-host';
+        h.style.cssText = 'all:initial;position:fixed;top:0;left:0;width:0;height:0;z-index:2147483646;';
+        const r = h.attachShadow({ mode: 'open' });
         const css = document.createElement('link');
         css.rel = 'stylesheet';
-        css.href = chrome.runtime.getURL('ui.css');
+        try { css.href = chrome.runtime.getURL('ui.css'); } catch { ctx.check(); return false; }
 
-        modal = Object.assign(document.createElement('div'), { id: 'casseroles-modal' });
-        modal.setAttribute('role', 'dialog');
-        modal.setAttribute('aria-label', 'Dossier');
+        const m = Object.assign(document.createElement('div'), { id: 'casseroles-modal' });
+        m.setAttribute('role', 'dialog');
+        m.setAttribute('aria-label', 'Dossier');
 
         // Enveloppe (ombre portée) + ticket (bord dentelé) : le masque d'un élément coupe sa propre ombre.
-        bubble = Object.assign(document.createElement('div'), { id: 'casseroles-float-bubble' });
-        bubble.setAttribute('role', 'button');
-        bubble.tabIndex = 0;
-        stub = Object.assign(document.createElement('span'), { className: 'stub' });
-        bubble.appendChild(stub);
+        const b = Object.assign(document.createElement('div'), { id: 'casseroles-float-bubble' });
+        b.setAttribute('role', 'button');
+        b.tabIndex = 0;
+        const st = Object.assign(document.createElement('span'), { className: 'stub' });
+        b.appendChild(st);
 
-        root.append(css, bubble, modal);
-        (document.body || document.documentElement).appendChild(host);
+        r.append(css, b, m);
+        (document.body || document.documentElement).appendChild(h);
+        host = h; root = r; bubble = b; stub = st; modal = m;
 
         const open = () => bubble.dataset.name && openModal(bubble.dataset.name);
         bubble.addEventListener('click', (e) => { e.stopPropagation(); open(); });
         bubble.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+        return true;
+    };
+
+    // Contexte invalidé : on retire l'UI (aucun appel chrome.*).
+    const destroy = () => {
+        if (host) host.remove();
+        host = root = bubble = stub = modal = lastFocus = null;
     };
 
     const showFloat = (element, name) => {
-        if (!state.enabled) return;
-        ensureHost();
+        if (!state.enabled || !ensureHost()) return;
         bubble.dataset.name = name;
         stub.textContent = bubbleText(state.humor, name);
         bubble.style.display = 'block';
@@ -68,8 +78,7 @@
 
     const openModal = (name) => {
         const entry = state.map.get(NS.text.normalize(name));
-        if (!entry) return;
-        ensureHost();
+        if (!entry || !ensureHost()) return;
         lastFocus = document.activeElement;
         const reportUrl = `${REPO}/issues/new?title=${encodeURIComponent(`Signalement : ${name}`)}` +
             `&body=${encodeURIComponent('Décrivez l\'erreur ou l\'omission, avec un lien vers une source (décision de justice, article).')}`;
@@ -90,6 +99,8 @@
         hideFloat(true);
         closeModal();
     });
+
+    ctx.onDead(destroy);
 
     NS.ui = { showFloat, hideFloat, openModal, closeModal, isOpen };
 })();

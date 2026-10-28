@@ -6,18 +6,22 @@
     const { normalize } = NS.text;
     const { buildMatcher, findMatches } = NS.matcher;
     const ui = NS.ui;
+    const ctx = NS.context;
 
     const OURS = '#casseroles-host, .casseroles-rough-highlight';
     const SKIP = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEXTAREA', 'INPUT', 'SELECT', 'OPTION']);
     const DEBOUNCE_MS = 400;
 
-    let regex = null, observer = null, timer = null;
+    let regex = null, observer = null, timer = null, watchdog = null;
     const pending = new Set();   // racines ajoutées au DOM depuis le dernier passage
     const seen = new Set();      // mode "une seule fois par page"
 
     const rebuild = () => { regex = buildMatcher([...state.map.keys()]); };
     const countHighlights = () => document.querySelectorAll('.casseroles-rough-highlight').length;
-    const report = () => chrome.runtime.sendMessage({ action: 'setBadge', count: countHighlights() }).catch(() => {});
+    const report = () => {
+        if (!ctx.check()) return;
+        try { chrome.runtime.sendMessage({ action: 'setBadge', count: countHighlights() }).catch(() => {}); } catch { ctx.check(); }
+    };
 
     const isOurs = (node) => {
         const el = node.nodeType === 1 ? node : node.parentElement;
@@ -75,7 +79,7 @@
     };
 
     const scan = (root) => {
-        if (!state.enabled || !regex || !root || !root.isConnected) return;
+        if (!state.enabled || !regex || !root || !root.isConnected || !ctx.check()) return;
         if (root.nodeType === Node.TEXT_NODE) return processTextNode(root);
         if (root.nodeType !== Node.ELEMENT_NODE || isOurs(root)) return;
         const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
@@ -88,6 +92,7 @@
 
     const flush = () => {
         timer = null;
+        if (!ctx.check()) return;
         const roots = [...pending];
         pending.clear();
         roots.forEach(scan);
@@ -96,7 +101,7 @@
     };
 
     const onMutations = (mutations) => {
-        if (!state.enabled) return;
+        if (!state.enabled || !ctx.check()) return;
         for (const m of mutations) {
             for (const n of m.addedNodes) {
                 if ((n.nodeType === 1 || n.nodeType === 3) && !isOurs(n)) pending.add(n);
@@ -106,7 +111,7 @@
     };
 
     const enable = () => {
-        if (!document.body) return;
+        if (!document.body || !ctx.check()) return;
         scan(document.body);
         if (observer) observer.takeRecords();
         report();
@@ -120,7 +125,18 @@
         report();
     };
 
+    // Contexte invalidé (extension rechargée) : on retire nos surlignages et nos observateurs, sans AUCUN appel chrome.*.
+    const teardown = () => {
+        clearTimeout(timer); timer = null; clearInterval(watchdog); watchdog = null;
+        pending.clear(); seen.clear();
+        if (observer) { observer.disconnect(); observer = null; }
+        document.querySelectorAll('.casseroles-rough-highlight').forEach((span) => span.replaceWith(document.createTextNode(span.textContent)));
+    };
+    ctx.onDead(teardown);
+
     const init = () => {
+        if (!ctx.check()) return;
+        watchdog = setInterval(ctx.check, 3000);       // repère un orphelin même sur une page immobile
         rebuild();
         observer = new MutationObserver(onMutations);
         observer.observe(document.body || document.documentElement, { childList: true, subtree: true });

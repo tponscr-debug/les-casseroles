@@ -124,3 +124,14 @@ test('texte de bulle stable pour un nom donné', () => {
     assert.equal(C.copy.bubble('funny', 'Marine Le Pen'), C.copy.bubble('funny', 'Marine Le Pen'));
     assert.equal(C.copy.bubble('serious', 'x'), 'Voir le dossier');
 });
+
+// ── Contexte d'extension : un script orphelin (extension rechargée) doit se démonter, une seule fois ──
+test('context : sans chrome.* le contexte est mort ; le démontage est notifié une seule fois', () => {
+    let calls = 0;
+    C.context.onDead(() => { calls++; });
+    assert.equal(C.context.alive(), false);
+    assert.equal(C.context.check(), false);
+    assert.equal(C.context.check(), false);
+    assert.equal(calls, 1);
+    assert.equal(C.context.isDead(), true);
+});
