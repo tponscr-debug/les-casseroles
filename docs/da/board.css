@@ -1,0 +1,29 @@
+/* Planche de directions artistiques — Les Casseroles. Mise en page neutre ; chaque DA a sa feuille (da-a/b/c.css). */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0E0E10; color: #E9E6DF; font: 15px/1.55 'Inter', system-ui, sans-serif; padding: 56px 24px 120px; }
+.wrap { max-width: 1240px; margin: 0 auto; }
+.top h1 { font: 800 clamp(34px, 5vw, 64px)/1 'Inter', sans-serif; letter-spacing: -.03em; }
+.top h1 em { color: #FF6B35; font-style: normal; }
+.top p { max-width: 70ch; color: #A8A39A; margin-top: 14px; }
+.rule { margin: 34px 0 10px; padding: 20px 24px; border: 2px dashed #FF6B35; border-radius: 14px; background: #1A1210; }
+.rule b { color: #FF6B35; }
+.rule .ex { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; font-size: 13px; }
+.rule .ex div { padding: 12px 14px; border-radius: 10px; background: #0E0E10; }
+.rule .ok { border-left: 4px solid #5fd38d; } .rule .no { border-left: 4px solid #E63946; }
+.da { margin-top: 90px; }
+.da-head { display: grid; grid-template-columns: auto 1fr; gap: 6px 26px; align-items: start; margin-bottom: 30px; }
+.da-letter { grid-row: span 3; font: 900 120px/.8 'Inter', sans-serif; color: #ffffff14; }
+.da-head h2 { font: 800 clamp(28px, 3.4vw, 44px)/1.05 'Inter', sans-serif; letter-spacing: -.02em; }
+.da-head .pitch { color: #B9B4AA; max-width: 76ch; }
+.specs { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 12px; color: #8E897F; }
+.specs b { color: #D8D4CB; font-weight: 600; }
+.sw { display: inline-flex; gap: 0; border-radius: 6px; overflow: hidden; vertical-align: middle; margin-left: 4px; }
+.sw i { width: 22px; height: 16px; display: block; }
+.scene { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 34px 28px; align-items: start; }
+.cap { font: 700 11px/1 'Inter', sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #6F6B63; margin-bottom: 12px; }
+.gags { margin-top: 36px; columns: 3 300px; column-gap: 28px; font-size: 13px; color: #B9B4AA; list-style: none; }
+.gags li { break-inside: avoid; margin-bottom: 9px; padding-left: 14px; position: relative; }
+.gags li::before { content: '›'; position: absolute; left: 0; color: #FF6B35; font-weight: 800; }
+.gags li b { color: #E9E6DF; font-weight: 600; }
+.foot { margin-top: 90px; color: #8E897F; font-size: 13px; max-width: 80ch; }
+@media (max-width: 700px) { .rule .ex { grid-template-columns: 1fr; } .da-letter { display: none; } }

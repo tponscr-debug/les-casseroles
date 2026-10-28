@@ -1,0 +1,29 @@
+/* C — L'Addition : ticket de caisse thermique, la casserole est une brasserie. */
+.da-c { --paper: #F6F3EA; --ink: #1D1B17; --fade: #7B766B; --stamp: #C8281E; }
+.da-c .page-sim { background: #1C1C1F; color: #E8E5DC; font: 17px/1.8 'Inter', sans-serif; padding: 26px 28px; border-radius: 12px; border: 1px solid #2c2c30; }
+.da-c .hl { background: linear-gradient(transparent 52%, #FFE36666 52%); border-bottom: 2px dotted #FFE366; font-weight: 600; cursor: pointer; padding: 0 2px; }
+.da-c .tip { display: inline-block; margin-top: 16px; background: var(--paper); color: var(--ink); font: 700 12px 'Space Mono', monospace; letter-spacing: .04em; padding: 10px 16px 14px; position: relative; box-shadow: 0 10px 24px #0007;
+  -webkit-mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 12px 100%; mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 12px 100%; }
+.da-c .receipt { background: var(--paper); color: var(--ink); font: 13px/1.5 'Space Mono', monospace; padding: 24px 24px 34px; position: relative; box-shadow: 0 34px 70px #000b;
+  -webkit-mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 14px 100%; mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 14px 100%; }
+.da-c .receipt::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, #0000 0 3px, #00000008 3px 4px); pointer-events: none; }
+.da-c .c { text-align: center; }
+.da-c .brand { font: 700 19px/1.2 'Space Mono', monospace; letter-spacing: .08em; }
+.da-c .meta { color: var(--fade); font-size: 11px; }
+.da-c hr { border: 0; border-top: 2px dashed var(--fade); margin: 12px 0; opacity: .7; }
+.da-c .who { font: 700 22px/1.15 'Space Mono', monospace; text-transform: uppercase; margin-top: 2px; }
+.da-c .row { display: flex; justify-content: space-between; gap: 12px; }
+.da-c .row b { font-weight: 700; }
+.da-c .line { margin: 10px 0; }
+.da-c .line .t { padding-left: 0; color: var(--ink); }
+.da-c .line small { display: block; color: var(--fade); font-size: 11.5px; line-height: 1.45; margin-top: 2px; }
+.da-c .tag { display: inline-block; border: 2px solid var(--ink); padding: 0 6px; font-weight: 700; font-size: 11px; letter-spacing: .04em; }
+.da-c .tag.conv { background: var(--ink); color: var(--paper); }
+.da-c .stamp { display: table; margin: 12px auto 4px; border: 3px solid var(--stamp); color: var(--stamp); font: 700 15px 'Space Mono', monospace; letter-spacing: .12em; padding: 3px 12px; transform: rotate(-5deg); opacity: .88; text-transform: uppercase; mix-blend-mode: multiply; }
+.da-c .bar { font-size: 15px; letter-spacing: -1px; }
+.da-c .src a { color: var(--ink); text-decoration: underline wavy var(--fade); text-underline-offset: 3px; }
+.da-c .ok { color: #1E6B35; font-weight: 700; }
+.da-c details { margin-top: 4px; font-size: 11.5px; color: var(--fade); }
+.da-c details summary { cursor: pointer; color: var(--ink); font-weight: 700; }
+.da-c .barcode { height: 38px; margin: 14px auto 4px; width: 78%; background: repeating-linear-gradient(90deg, var(--ink) 0 2px, #0000 2px 4px, var(--ink) 4px 5px, #0000 5px 9px, var(--ink) 9px 12px, #0000 12px 14px); }
+.da-c .thanks { font-weight: 700; letter-spacing: .06em; }
