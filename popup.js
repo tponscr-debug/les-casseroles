@@ -1,4 +1,4 @@
-// Les Casseroles — Popup v3.0
+// Les Casseroles — Popup v3.1
 
 let currentEnabled = true;
 
@@ -8,6 +8,8 @@ const pageText    = document.getElementById('page-text');
 const pageDot     = document.getElementById('page-dot');
 const statPage    = document.getElementById('stat-page');
 const statPoliticians = document.getElementById('stat-politicians');
+const firstOnlyBox = document.getElementById('first-only');
+const freshness = document.getElementById('freshness');
 
 // 21st.dev: animated counter (0 → target)
 const animateCounter = (el, target, duration = 800) => {
@@ -23,9 +25,17 @@ const animateCounter = (el, target, duration = 800) => {
 };
 
 // État
-chrome.storage.local.get(['enabled'], (result) => {
+chrome.storage.local.get(['enabled', 'firstOnly'], (result) => {
     currentEnabled = result.enabled !== false;
+    firstOnlyBox.checked = result.firstOnly === true;
     updateButton();
+});
+
+firstOnlyBox.addEventListener('change', () => {
+    chrome.storage.local.set({ firstOnly: firstOnlyBox.checked });
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs[0]) chrome.tabs.sendMessage(tabs[0].id, { action: 'setFirstOnly', firstOnly: firstOnlyBox.checked });
+    });
 });
 
 // Stats depuis le content script
@@ -38,13 +48,15 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             return;
         }
 
+        if (response.verifiedAt) freshness.textContent = `Données vérifiées le ${new Date(response.verifiedAt).toLocaleDateString('fr-FR')}`;
+
         // Animer les compteurs
         animateCounter(statPoliticians, response.total, 600);
         animateCounter(statPage, response.count, 800);
 
         if (response.count > 0) {
             pageDot.classList.remove('inactive');
-            pageText.innerHTML = `<strong>${response.count} nom${response.count > 1 ? 's' : ''}</strong> surligné${response.count > 1 ? 's' : ''} sur cette page.`;
+            pageText.textContent = `${response.count} nom${response.count > 1 ? 's' : ''} surligné${response.count > 1 ? 's' : ''} sur cette page.`;
         } else {
             pageText.textContent = 'Aucun politicien répertorié ici.';
         }

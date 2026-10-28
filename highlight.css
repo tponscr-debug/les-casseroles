@@ -1,0 +1,30 @@
+/* Les Casseroles — surlignage dans la page hôte (seule feuille injectée dans le DOM du site). */
+/* Valeurs littérales : on ne pose AUCUNE variable :root dans la page. */
+/* ─── Surlignage ──────────────────────────────────────────────────────────── */
+.casseroles-rough-highlight {
+    position: relative;
+    cursor: pointer;
+    color: inherit !important;
+    text-decoration: none !important;
+    font-weight: 700 !important;
+    border-bottom: 2px solid #D4A853 !important;
+    display: inline;
+    padding-bottom: 1px;
+    transition: color 0.15s;
+}
+
+.casseroles-rough-highlight:focus-visible { outline: 2px solid #E63946; outline-offset: 2px; border-radius: 2px; }
+
+.casseroles-rough-highlight::before {
+    content: '';
+    position: absolute;
+    inset: -2px -4px 0;
+    background: rgba(230, 57, 70, 0.07);
+    border-radius: 3px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+}
+
+.casseroles-rough-highlight:hover::before { opacity: 1; }
+

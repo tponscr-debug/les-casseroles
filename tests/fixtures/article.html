@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>Article de test</title>
+<style>
+  /* CSS hostile : doit être sans effet sur l'UI de l'extension (Shadow DOM) */
+  div, span, p, a { font-family: "Comic Sans MS", cursive !important; letter-spacing: 6px !important; }
+  div { color: lime !important; }
+</style></head>
+<body>
+<h1>Revue de presse</h1>
+<p id="p1">Selon nos informations, Adrien Quatennens est revenu sur le devant de la scène, tandis qu'ÉLISABETH BORNE défendait le texte.</p>
+<p id="p2">Un lien : <a id="lnk" href="#cible">Adrien Quatennens dans un lien</a>.</p>
+<p>Un champ : <input id="inp" value="Adrien Quatennens"> <textarea id="ta">Adrien Quatennens</textarea></p>
+<p>Faux positif attendu : Quatennensesque et anti-Elisabeth Borne.</p>
+<script id="scr">var x = "Adrien Quatennens dans un script";</script>
+<div id="cible">cible</div>
+<div id="dyn"></div>
+<script>setTimeout(() => { document.getElementById('dyn').innerHTML = '<p id="p3">Ajouté après coup : Adrien Quatennens.</p>'; }, 1200);</script>
+</body></html>

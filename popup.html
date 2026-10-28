@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <title>Les Casseroles</title>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Libre+Bodoni:wght@700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="fonts-ext.css" rel="stylesheet">
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             width: 300px;
             background: #0D0D0D;
-            font-family: 'DM Sans', sans-serif;
+            font-family: 'Casseroles DM Sans', sans-serif;
             color: #F0EDE8;
         }
 
@@ -33,7 +33,7 @@
         }
 
         .logo-text {
-            font-family: 'Syne', sans-serif;
+            font-family: 'Casseroles Syne', sans-serif;
             font-size: 18px;
             font-weight: 800;
             letter-spacing: -0.02em;
@@ -72,7 +72,7 @@
         }
 
         .stat-number {
-            font-family: 'Syne', sans-serif;
+            font-family: 'Casseroles Syne', sans-serif;
             font-size: 30px;
             font-weight: 800;
             color: #E63946;
@@ -144,7 +144,7 @@
             padding: 11px 16px;
             border-radius: 8px;
             border: 1px solid transparent;
-            font-family: 'DM Sans', sans-serif;
+            font-family: 'Casseroles DM Sans', sans-serif;
             font-size: 11px;
             font-weight: 700;
             letter-spacing: 0.1em;
@@ -185,6 +185,11 @@
             flex-shrink: 0;
             opacity: 0.8;
         }
+
+        .option-row { display: flex; align-items: center; gap: 10px; padding: 0 20px 14px; cursor: pointer;
+            font-size: 11px; color: #888078; font-weight: 500; }
+        .option-row input { accent-color: #E63946; width: 14px; height: 14px; }
+        .freshness { padding: 0 20px 6px; font-size: 10px; color: #555; text-align: center; letter-spacing: .04em; }
 
         /* Footer */
         .footer {
@@ -237,8 +242,14 @@
         </button>
     </div>
 
+    <label class="option-row" for="first-only">
+        <input type="checkbox" id="first-only">
+        <span>Surligner chaque nom une seule fois par page</span>
+    </label>
+    <div class="freshness" id="freshness"></div>
+
     <div class="footer">
-        <a href="mailto:lcasseroles@gmail.com">Signaler une erreur</a>
+        <a href="https://github.com/tponscr-debug/les-casseroles/issues/new" target="_blank" rel="noopener noreferrer">Signaler une erreur · droit de réponse</a>
     </div>
 
     <script src="popup.js"></script>

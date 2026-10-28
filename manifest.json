@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "Les Casseroles",
-    "version": "2.0",
-    "description": "Révèle le casier judiciaire des politiques français sur n'importe quelle page.",
+    "version": "3.0",
+    "description": "Affiche, sources à l'appui, les affaires judiciaires et polémiques des responsables politiques français sur n'importe quelle page.",
     "icons": {
         "16": "icon_final.png",
         "48": "icon_final.png",
@@ -21,13 +21,10 @@
         "service_worker": "background.js"
     },
     "permissions": [
-        "activeTab",
-        "storage",
-        "scripting",
-        "tabs"
+        "storage"
     ],
     "host_permissions": [
-        "<all_urls>"
+        "https://raw.githubusercontent.com/*"
     ],
     "content_scripts": [
         {
@@ -35,10 +32,17 @@
                 "<all_urls>"
             ],
             "js": [
+                "js/text.js",
+                "js/matcher.js",
+                "js/data.js",
+                "js/ui-render.js",
+                "js/ui.js",
+                "js/highlighter.js",
                 "content.js"
             ],
             "css": [
-                "styles.css"
+                "fonts.css",
+                "highlight.css"
             ],
             "run_at": "document_idle"
         }
@@ -48,11 +52,14 @@
             "resources": [
                 "data/encyclopedia.json",
                 "icon_final.png",
-                "casserole_v3.png"
+                "casserole_v3.png",
+                "ui.css",
+                "fonts/*.woff2"
             ],
             "matches": [
                 "<all_urls>"
             ]
         }
-    ]
+    ],
+    "default_locale": "fr"
 }
