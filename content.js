@@ -1,6 +1,7 @@
 // Les Casseroles — content script (colle les modules : text, matcher, data, sites, copy, context, ui-render, ui, highlighter).
 (async () => {
-    const { data, highlighter, sites } = globalThis.Casseroles;
+    const { data, highlighter, sites, context } = globalThis.Casseroles;
+    if (!context.check()) return;                  // injecté dans un contexte déjà invalidé : on ne fait rien
     const { state } = data;
     const host = location.hostname;
     let booted = false;
@@ -53,4 +54,4 @@
     lists = { sitesAllowed: stored.sitesAllowed || [], sitesExcluded: stored.sitesExcluded || [] };
     site = sites.decide(host, lists, document, window);
     await apply();
-})();
+})().catch(() => { globalThis.Casseroles.context.check(); });   // le contexte peut mourir pendant un await : pas d'erreur non gérée

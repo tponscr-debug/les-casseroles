@@ -159,6 +159,15 @@ def main():
         check("exclusion : un site exclu d'office peut être réactivé à la main", count() >= 3)
         ctx.close()
 
+        # ── 8. popup : aucun « Unchecked runtime.lastError » quand l'onglet actif n'a pas de script de contenu ──
+        ctx = launch(p, tempfile.mkdtemp()); sw = sw_of(ctx)
+        perrs = []
+        pop = ctx.new_page(); pop.on("console", lambda m: perrs.append(m.text) if m.type == "error" else None); pop.on("pageerror", lambda e: perrs.append(str(e)))
+        pop.goto(f"chrome-extension://{sw.url.split('/')[2]}/popup.html"); time.sleep(1)
+        pop.click("#toggle-btn"); pop.click("#toggle-btn"); pop.check("#serious-mode"); pop.uncheck("#serious-mode"); pop.check("#first-only"); time.sleep(0.8)
+        check("popup : aucune erreur (lastError lu)", not perrs, str(perrs))
+        ctx.close()
+
         # ── 6. extension rechargée : l'onglet déjà ouvert garde un script ORPHELIN (bug vu sur localhost:4800) ──
         ctx = launch(p, tempfile.mkdtemp()); sw = sw_of(ctx)
         ctx.route("https://raw.githubusercontent.com/**", lambda r: r.abort())

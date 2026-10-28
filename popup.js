@@ -21,8 +21,11 @@ const animateCounter = (node, target, duration = 700) => {
     requestAnimationFrame(tick);
 };
 
-const sendToTab = (msg, cb) => chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    if (tabs[0]) chrome.tabs.sendMessage(tabs[0].id, msg, cb);
+// Un onglet sans script de contenu (page chrome://, nouvel onglet, Web Store…) répond par une erreur de connexion :
+// c'est normal, on la lit pour qu'elle ne remonte pas comme « Unchecked runtime.lastError ».
+const sendToTab = (msg, cb = () => {}) => chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (!tabs[0]) return;
+    chrome.tabs.sendMessage(tabs[0].id, msg, (res) => { void chrome.runtime.lastError; cb(res); });
 });
 
 // Tout le texte visible dépend du mode : une seule fonction le recalcule.

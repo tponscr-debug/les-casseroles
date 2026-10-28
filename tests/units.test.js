@@ -169,3 +169,31 @@ test('sites : update exclut/réactive sans muter et sans doublon', () => {
     assert.deepEqual(b, { sitesAllowed: ['a.fr', 'b.fr'], sitesExcluded: [] });
     assert.deepEqual(sites.update(b, 'b.fr', 'allow').sitesAllowed, ['a.fr', 'b.fr']);
 });
+
+// ── Service worker : un badge demandé pour un onglet fermé ne doit produire AUCUN rejet non géré ──
+test('background : onglet fermé (No tab with id) -> aucune promesse rejetée non gérée', async () => {
+    const unhandled = [];
+    const onUnhandled = (e) => unhandled.push(String(e));
+    process.on('unhandledRejection', onUnhandled);
+    let handler;
+    const gone = () => Promise.reject(new Error('No tab with id: 1'));
+    globalThis.chrome = { runtime: { onMessage: { addListener: (fn) => { handler = fn; } } }, action: { setBadgeText: gone, setBadgeBackgroundColor: gone } };
+    const { onMessage } = require('../background.js');
+    onMessage({ action: 'setBadge', count: 5 }, { tab: { id: 1 } });
+    onMessage({ action: 'setBadge', count: 150 }, { tab: { id: 2 } });
+    onMessage({ action: 'setBadge', count: 3 }, {});                 // pas d'onglet : ignoré
+    await new Promise((r) => setTimeout(r, 50));
+    process.off('unhandledRejection', onUnhandled);
+    delete globalThis.chrome;
+    assert.equal(typeof handler, 'function');
+    assert.deepEqual(unhandled, []);
+});
+
+test('background : si chrome.runtime a disparu (rechargement en cours), le script ne lève aucune erreur', () => {
+    const path = require.resolve('../background.js');
+    delete require.cache[path];
+    globalThis.chrome = { runtime: undefined, action: {} };
+    assert.doesNotThrow(() => require('../background.js'));
+    delete globalThis.chrome; delete require.cache[path];
+    assert.doesNotThrow(() => require('../background.js'));            // pas de `chrome` du tout
+});
