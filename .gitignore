@@ -1,0 +1,5 @@
+.DS_Store
+node_modules/
+# cache local de vérification (réponses LLM + preuves) : régénérable mais PAYANT à régénérer, gardez-le en local
+data/verification.json
+.browser-profile/
