@@ -55,6 +55,10 @@ Afficher, sur n'importe quelle page, les affaires des responsables politiques fr
 - `validate_data.py` : schéma + règles de fiabilité (aussi en CI à venir).
 - Vérification manuelle de la sortie LLM sur cas difficiles (Sarkozy, Le Pen) avant tout run en lot.
 
+## 6bis. Direction artistique — « L'Addition » (validée le 2026-10-28)
+Fiche = ticket de caisse de brasserie (Space Mono, papier thermique, bord dentelé, tampon, code-barres). Bulle = petit ticket « Voir l'addition ». Popup = mini-ticket. Deux registres (`js/copy.js`) : **drôle** (par défaut) et **sérieux** (même contenu, sans blagues ; réglage dans le popup).
+**Règle d'or : on rigole du décor, jamais du verdict.** Les tags de statut juridique sont identiques et sobres dans les deux modes (testé) ; les blagues vivent dans les pieds de ticket, la colonne de droite (« RÉGLÉE », « EN COURS »), la jauge de cuisson et « le mot du serveur » (jamais sur un dossier judiciaire). Interdits : blague sur l'infraction, les victimes, les violences, la santé. Le tampon n'est exact que pour une affaire ; au-delà il renvoie aux lignes. Planche des 3 directions : `docs/da/index.html`.
+
 ## 7. État
 **Fait** : correctifs de l'audit (XSS, perf, observer, polices locales, permissions, lien cliquable, casse accentuée), modularisation, Shadow DOM, politique d'affichage, statuts/preuves/sources dans l'UI, nettoyage des données (partis 288→60, types, années, doublons), pipeline de vérification, détection de changement par `revid`, tests.
 **Vérifié sur 3 personnes** (Quatennens, Le Pen, Sarkozy). **Non lancé** : la vérification des 386 personnes / 774 affirmations restantes (en attente de ton accord, cf. coût).

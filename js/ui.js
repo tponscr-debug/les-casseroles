@@ -1,12 +1,13 @@
-// Les Casseroles — interface : bulle + modale, isolées dans un Shadow DOM.
-// Le CSS du site hôte ne peut plus casser l'UI, et nos styles ne fuient plus dans la page.
+// Les Casseroles — interface : bulle « ticket » + fiche « L'Addition », isolées dans un Shadow DOM.
+// Le CSS du site hôte ne peut pas casser l'UI, et nos styles ne fuient pas dans la page.
 (() => {
     const NS = (globalThis.Casseroles = globalThis.Casseroles || {});
     const { state } = NS.data;
     const { renderModal } = NS.render;
+    const { bubble: bubbleText } = NS.copy;
 
     const REPO = 'https://github.com/tponscr-debug/les-casseroles';
-    let host = null, root = null, bubble = null, modal = null, lastFocus = null;
+    let host = null, root = null, bubble = null, stub = null, modal = null, lastFocus = null;
 
     const ensureHost = () => {
         if (host) return;
@@ -17,12 +18,18 @@
         const css = document.createElement('link');
         css.rel = 'stylesheet';
         css.href = chrome.runtime.getURL('ui.css');
+
         modal = Object.assign(document.createElement('div'), { id: 'casseroles-modal' });
         modal.setAttribute('role', 'dialog');
-        modal.setAttribute('aria-label', 'Casseroles');
-        bubble = Object.assign(document.createElement('div'), { id: 'casseroles-float-bubble', textContent: '🍳 Voir les casseroles' });
+        modal.setAttribute('aria-label', 'Dossier');
+
+        // Enveloppe (ombre portée) + ticket (bord dentelé) : le masque d'un élément coupe sa propre ombre.
+        bubble = Object.assign(document.createElement('div'), { id: 'casseroles-float-bubble' });
         bubble.setAttribute('role', 'button');
         bubble.tabIndex = 0;
+        stub = Object.assign(document.createElement('span'), { className: 'stub' });
+        bubble.appendChild(stub);
+
         root.append(css, bubble, modal);
         (document.body || document.documentElement).appendChild(host);
 
@@ -35,12 +42,13 @@
         if (!state.enabled) return;
         ensureHost();
         bubble.dataset.name = name;
+        stub.textContent = bubbleText(state.humor, name);
         bubble.style.display = 'block';
         const bw = bubble.offsetWidth;
         const rect = element.getBoundingClientRect();
         const left = Math.max(8, Math.min(rect.left + rect.width / 2 - bw / 2, window.innerWidth - bw - 8));
         bubble.style.left = `${left}px`;
-        bubble.style.top = `${Math.max(8, rect.top - 48)}px`;
+        bubble.style.top = `${Math.max(8, rect.top - 52)}px`;
     };
 
     const hideFloat = (force = false) => {
@@ -49,11 +57,11 @@
         setTimeout(() => { if (bubble && !bubble.matches(':hover')) bubble.style.display = 'none'; }, 300);
     };
 
+    const isOpen = () => !!modal && modal.classList.contains('open');
+
     const closeModal = () => {
-        if (!modal || modal.style.display === 'none' || !modal.style.display) return;
-        modal.style.opacity = '0';
-        modal.style.transform = 'translate(-50%, -50%) scale(0.95)';
-        setTimeout(() => { if (modal) modal.style.display = 'none'; }, 200);
+        if (!isOpen()) return;
+        modal.classList.remove('open');
         hideFloat(true);
         if (lastFocus && lastFocus.focus) lastFocus.focus();
     };
@@ -65,17 +73,15 @@
         lastFocus = document.activeElement;
         const reportUrl = `${REPO}/issues/new?title=${encodeURIComponent(`Signalement : ${name}`)}` +
             `&body=${encodeURIComponent('Décrivez l\'erreur ou l\'omission, avec un lien vers une source (décision de justice, article).')}`;
-        modal.innerHTML = renderModal(name, entry, { potUrl: chrome.runtime.getURL('casserole_v3.png'), meta: state.meta, reportUrl });
-        modal.style.display = 'flex';
-        modal.style.opacity = '0';
-        modal.style.transform = 'translate(-50%, -50%) scale(0.95)';
-        requestAnimationFrame(() => { modal.style.opacity = '1'; modal.style.transform = 'translate(-50%, -50%) scale(1)'; });
+        modal.innerHTML = `<div class="receipt">${renderModal(name, entry, { humor: state.humor, meta: state.meta, reportUrl })}</div>`;
+        modal.classList.remove('open');
+        void modal.offsetWidth;                   // relance l'animation d'impression
+        modal.classList.add('open');
         const close = root.getElementById('casseroles-close-btn');
         close.addEventListener('click', closeModal);
         close.focus();
     };
 
-    // Échap ferme ; clic hors UI ferme.
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
     document.addEventListener('click', (e) => {
         const path = e.composedPath();
@@ -85,5 +91,5 @@
         closeModal();
     });
 
-    NS.ui = { showFloat, hideFloat, openModal, closeModal, isOpen: () => !!modal && modal.style.display === 'flex' };
+    NS.ui = { showFloat, hideFloat, openModal, closeModal, isOpen };
 })();

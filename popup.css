@@ -1,0 +1,29 @@
+/* Les Casseroles — popup : un mini-ticket. */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root { --paper: #F6F3EA; --ink: #1D1B17; --fade: #6F6A5F; --stamp: #C8281E; --ok: #1E6B35; --mono: 'Casseroles Mono', 'SF Mono', Menlo, Consolas, monospace; }
+body { width: 320px; background: #1C1C1F; padding: 14px 14px 18px; font: 12.5px/1.5 var(--mono); }
+.ticket {
+    padding: 20px 20px 30px; color: var(--ink);
+    background: repeating-linear-gradient(0deg, #0000 0 3px, #00000009 3px 4px), var(--paper);
+    -webkit-mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 14px 100%;
+            mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 14px 100%;
+}
+.c { text-align: center; }
+.brand { font: 700 17px/1.2 var(--mono); letter-spacing: 0.08em; }
+.meta { color: var(--fade); font-size: 11px; line-height: 1.45; }
+hr { border: 0; border-top: 2px dashed var(--fade); margin: 11px 0; opacity: 0.7; }
+.row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 11.5px; }
+.row b { font: 700 18px/1.2 var(--mono); }
+.status { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 11.5px; color: var(--fade); }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); flex-shrink: 0; }
+.dot.inactive { background: var(--fade); }
+.toggle-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; border: 2px solid var(--ink); background: var(--ink); color: var(--paper); font: 700 12px var(--mono); letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; }
+.toggle-btn.off { background: transparent; color: var(--ink); border-style: dashed; }
+.toggle-btn:hover { background: var(--stamp); border-color: var(--stamp); color: #fff; }
+.toggle-btn:focus-visible, .opt input:focus-visible, .reply a:focus-visible { outline: 2px solid var(--stamp); outline-offset: 2px; }
+.toggle-indicator { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.opt { display: flex; align-items: center; gap: 10px; margin-top: 10px; cursor: pointer; font-size: 11.5px; }
+.opt input { accent-color: var(--ink); width: 14px; height: 14px; flex-shrink: 0; }
+.barcode { height: 30px; margin: 10px auto 2px; width: 78%; background: repeating-linear-gradient(90deg, var(--ink) 0 2px, #0000 2px 4px, var(--ink) 4px 5px, #0000 5px 9px, var(--ink) 9px 12px, #0000 12px 14px); }
+.reply { margin-top: 8px; font-size: 10.5px; }
+.reply a { color: var(--ink); text-decoration: underline wavy var(--fade); text-underline-offset: 3px; }

@@ -1,91 +1,80 @@
-// Les Casseroles — Popup v3.1
+// Les Casseroles — popup « mini-ticket ». Micro-textes : js/copy.js (mode drôle / sérieux).
 
-let currentEnabled = true;
+const NS = globalThis.Casseroles;
+const $ = (id) => document.getElementById(id);
+const el = {
+    toggleBtn: $('toggle-btn'), toggleLabel: $('toggle-label'), pageText: $('page-text'), pageDot: $('page-dot'),
+    statPage: $('stat-page'), statTotal: $('stat-politicians'), firstOnly: $('first-only'), serious: $('serious-mode'),
+    freshness: $('freshness'), brand: $('brand'), sub: $('sub'), lblPage: $('lbl-page'), lblTotal: $('lbl-total'), thanks: $('thanks'),
+};
+const state = { enabled: true, humor: 'funny', pageCount: null, reachable: null };
 
-const toggleBtn   = document.getElementById('toggle-btn');
-const toggleLabel = document.getElementById('toggle-label');
-const pageText    = document.getElementById('page-text');
-const pageDot     = document.getElementById('page-dot');
-const statPage    = document.getElementById('stat-page');
-const statPoliticians = document.getElementById('stat-politicians');
-const firstOnlyBox = document.getElementById('first-only');
-const freshness = document.getElementById('freshness');
-
-// 21st.dev: animated counter (0 → target)
-const animateCounter = (el, target, duration = 800) => {
-    if (!target || target === 0) { el.textContent = '0'; return; }
+const animateCounter = (node, target, duration = 700) => {
+    if (!target) { node.textContent = '0'; return; }
     const start = performance.now();
-    const update = (now) => {
-        const progress = Math.min((now - start) / duration, 1);
-        const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
-        el.textContent = Math.round(eased * target);
-        if (progress < 1) requestAnimationFrame(update);
+    const tick = (now) => {
+        const p = Math.min((now - start) / duration, 1);
+        node.textContent = Math.round((1 - Math.pow(1 - p, 3)) * target);
+        if (p < 1) requestAnimationFrame(tick);
     };
-    requestAnimationFrame(update);
+    requestAnimationFrame(tick);
 };
 
-// État
-chrome.storage.local.get(['enabled', 'firstOnly'], (result) => {
-    currentEnabled = result.enabled !== false;
-    firstOnlyBox.checked = result.firstOnly === true;
-    updateButton();
+const sendToTab = (msg, cb) => chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (tabs[0]) chrome.tabs.sendMessage(tabs[0].id, msg, cb);
 });
 
-firstOnlyBox.addEventListener('change', () => {
-    chrome.storage.local.set({ firstOnly: firstOnlyBox.checked });
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        if (tabs[0]) chrome.tabs.sendMessage(tabs[0].id, { action: 'setFirstOnly', firstOnly: firstOnlyBox.checked });
-    });
+// Tout le texte visible dépend du mode : une seule fonction le recalcule.
+const render = () => {
+    const C = NS.copy.get(state.humor), P = C.popup;
+    el.brand.textContent = C.brand;
+    el.sub.textContent = C.sub;
+    el.lblPage.textContent = P.pageLabel;
+    el.lblTotal.textContent = P.totalLabel;
+    el.thanks.textContent = P.thanks;
+    el.toggleBtn.className = `toggle-btn ${state.enabled ? 'on' : 'off'}`;
+    el.toggleLabel.textContent = state.enabled ? P.on : P.off;
+    if (!state.enabled) { el.pageText.textContent = P.off_text; el.pageDot.classList.add('inactive'); return; }
+    if (state.reachable === false) el.pageText.textContent = P.inactive;
+    else if (state.pageCount === null) el.pageText.textContent = P.idle;
+    else el.pageText.textContent = state.pageCount > 0 ? P.count(state.pageCount) : P.none;
+    el.pageDot.classList.toggle('inactive', !(state.pageCount > 0));
+};
+
+chrome.storage.local.get(['enabled', 'firstOnly', 'humor'], (r) => {
+    state.enabled = r.enabled !== false;
+    state.humor = r.humor === 'serious' ? 'serious' : 'funny';
+    el.firstOnly.checked = r.firstOnly === true;
+    el.serious.checked = state.humor === 'serious';
+    render();
 });
 
-// Stats depuis le content script
-chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    if (!tabs[0]) return;
-    chrome.tabs.sendMessage(tabs[0].id, { action: 'getStats' }, (response) => {
-        if (chrome.runtime.lastError || !response) {
-            statPage.textContent = '—';
-            pageText.textContent = 'Pas encore actif sur cette page.';
-            return;
-        }
-
-        if (response.verifiedAt) freshness.textContent = `Données vérifiées le ${new Date(response.verifiedAt).toLocaleDateString('fr-FR')}`;
-
-        // Animer les compteurs
-        animateCounter(statPoliticians, response.total, 600);
-        animateCounter(statPage, response.count, 800);
-
-        if (response.count > 0) {
-            pageDot.classList.remove('inactive');
-            pageText.textContent = `${response.count} nom${response.count > 1 ? 's' : ''} surligné${response.count > 1 ? 's' : ''} sur cette page.`;
-        } else {
-            pageText.textContent = 'Aucun politicien répertorié ici.';
-        }
-    });
+sendToTab({ action: 'getStats' }, (res) => {
+    if (chrome.runtime.lastError || !res) { state.reachable = false; el.statPage.textContent = '—'; return render(); }
+    state.reachable = true;
+    state.pageCount = res.count;
+    animateCounter(el.statTotal, res.total, 600);
+    animateCounter(el.statPage, res.count, 800);
+    if (res.verifiedAt) el.freshness.textContent = `Données vérifiées le ${new Date(res.verifiedAt).toLocaleDateString('fr-FR')}`;
+    render();
 });
 
-// Toggle
-toggleBtn.addEventListener('click', () => {
-    currentEnabled = !currentEnabled;
-    chrome.storage.local.set({ enabled: currentEnabled });
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        if (tabs[0]) chrome.tabs.sendMessage(tabs[0].id, { action: 'toggle', enabled: currentEnabled });
-    });
-    if (!currentEnabled) {
-        animateCounter(statPage, 0, 400);
-        pageText.textContent = 'Extension désactivée.';
-        pageDot.classList.add('inactive');
-    } else {
-        pageDot.classList.remove('inactive');
-    }
-    updateButton();
+el.toggleBtn.addEventListener('click', () => {
+    state.enabled = !state.enabled;
+    chrome.storage.local.set({ enabled: state.enabled });
+    sendToTab({ action: 'toggle', enabled: state.enabled });
+    if (!state.enabled) animateCounter(el.statPage, 0, 400);
+    render();
 });
 
-function updateButton() {
-    if (currentEnabled) {
-        toggleBtn.className = 'toggle-btn on';
-        toggleLabel.textContent = 'Extension activée';
-    } else {
-        toggleBtn.className = 'toggle-btn off';
-        toggleLabel.textContent = 'Extension désactivée';
-    }
-}
+el.firstOnly.addEventListener('change', () => {
+    chrome.storage.local.set({ firstOnly: el.firstOnly.checked });
+    sendToTab({ action: 'setFirstOnly', firstOnly: el.firstOnly.checked });
+});
+
+el.serious.addEventListener('change', () => {
+    state.humor = el.serious.checked ? 'serious' : 'funny';
+    chrome.storage.local.set({ humor: state.humor });
+    sendToTab({ action: 'setHumor', humor: state.humor });
+    render();
+});

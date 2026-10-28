@@ -3,255 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <title>Les Casseroles</title>
-    <link href="fonts-ext.css" rel="stylesheet">
-    <style>
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            width: 300px;
-            background: #0D0D0D;
-            font-family: 'Casseroles DM Sans', sans-serif;
-            color: #F0EDE8;
-        }
-
-        /* Header */
-        .header {
-            padding: 20px 20px 16px;
-            border-bottom: 1px solid #2A2A2A;
-        }
-
-        .logo-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 4px;
-        }
-
-        .logo-icon {
-            font-size: 22px;
-            line-height: 1;
-        }
-
-        .logo-text {
-            font-family: 'Casseroles Syne', sans-serif;
-            font-size: 18px;
-            font-weight: 800;
-            letter-spacing: -0.02em;
-            color: #F0EDE8;
-            line-height: 1;
-        }
-
-        .tagline {
-            font-size: 10px;
-            font-weight: 500;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: #555;
-            padding-left: 32px;
-        }
-
-        /* Stats — 21st.dev: animated counter */
-        .stats {
-            display: flex;
-            border-bottom: 1px solid #2A2A2A;
-        }
-
-        .stat {
-            flex: 1;
-            padding: 16px 20px;
-            text-align: center;
-            position: relative;
-        }
-
-        .stat + .stat::before {
-            content: '';
-            position: absolute;
-            left: 0; top: 25%; bottom: 25%;
-            width: 1px;
-            background: #2A2A2A;
-        }
-
-        .stat-number {
-            font-family: 'Casseroles Syne', sans-serif;
-            font-size: 30px;
-            font-weight: 800;
-            color: #E63946;
-            letter-spacing: -0.04em;
-            line-height: 1;
-            display: block;
-        }
-
-        .stat-number.secondary { color: #D4A853; }
-
-        .stat-label {
-            font-size: 9px;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: #555;
-            margin-top: 4px;
-            display: block;
-        }
-
-        /* Statut page courante */
-        .page-status {
-            padding: 12px 20px;
-            border-bottom: 1px solid #2A2A2A;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            min-height: 44px;
-        }
-
-        .page-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: #E63946;
-            flex-shrink: 0;
-            box-shadow: 0 0 6px rgba(230, 57, 70, 0.5);
-            animation: casseroles-pulse 2s ease infinite;
-        }
-
-        .page-dot.inactive {
-            background: #333;
-            box-shadow: none;
-            animation: none;
-        }
-
-        @keyframes casseroles-pulse {
-            0%, 100% { opacity: 1; }
-            50%       { opacity: 0.4; }
-        }
-
-        .page-text {
-            font-size: 12px;
-            font-weight: 500;
-            color: #888;
-            line-height: 1.35;
-        }
-
-        .page-text strong { color: #F0EDE8; font-weight: 700; }
-
-        /* Toggle */
-        .toggle-section {
-            padding: 14px 20px;
-            border-bottom: 1px solid #2A2A2A;
-        }
-
-        .toggle-btn {
-            width: 100%;
-            padding: 11px 16px;
-            border-radius: 8px;
-            border: 1px solid transparent;
-            font-family: 'Casseroles DM Sans', sans-serif;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .toggle-btn.on {
-            background: #E63946;
-            color: #fff;
-            border-color: #E63946;
-            box-shadow: 0 4px 20px rgba(230, 57, 70, 0.3);
-        }
-
-        .toggle-btn.on:hover {
-            background: #d42f3c;
-            box-shadow: 0 4px 24px rgba(230, 57, 70, 0.45);
-        }
-
-        .toggle-btn.off {
-            background: transparent;
-            color: #555;
-            border-color: #2A2A2A;
-        }
-
-        .toggle-btn.off:hover { border-color: #444; color: #888; }
-
-        .toggle-indicator {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: currentColor;
-            flex-shrink: 0;
-            opacity: 0.8;
-        }
-
-        .option-row { display: flex; align-items: center; gap: 10px; padding: 0 20px 14px; cursor: pointer;
-            font-size: 11px; color: #888078; font-weight: 500; }
-        .option-row input { accent-color: #E63946; width: 14px; height: 14px; }
-        .freshness { padding: 0 20px 6px; font-size: 10px; color: #555; text-align: center; letter-spacing: .04em; }
-
-        /* Footer */
-        .footer {
-            padding: 10px 20px;
-            text-align: center;
-        }
-
-        .footer a {
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            color: #444;
-            text-decoration: none;
-            transition: color 0.15s;
-        }
-
-        .footer a:hover { color: #E63946; }
-    </style>
+    <link rel="stylesheet" href="fonts-ext.css">
+    <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-    <div class="header">
-        <div class="logo-row">
-            <span class="logo-icon">🍳</span>
-            <span class="logo-text">Les Casseroles</span>
-        </div>
-        <div class="tagline">Transparence politique</div>
-    </div>
-
-    <div class="stats">
-        <div class="stat">
-            <span class="stat-number" id="stat-politicians">—</span>
-            <span class="stat-label">Dossiers</span>
-        </div>
-        <div class="stat">
-            <span class="stat-number secondary" id="stat-page">—</span>
-            <span class="stat-label">Cette page</span>
-        </div>
-    </div>
-
-    <div class="page-status">
-        <div class="page-dot inactive" id="page-dot"></div>
-        <div class="page-text" id="page-text">Analyse en cours…</div>
-    </div>
-
-    <div class="toggle-section">
-        <button class="toggle-btn on" id="toggle-btn">
-            <span class="toggle-indicator"></span>
-            <span id="toggle-label">Extension activée</span>
-        </button>
-    </div>
-
-    <label class="option-row" for="first-only">
-        <input type="checkbox" id="first-only">
-        <span>Surligner chaque nom une seule fois par page</span>
-    </label>
-    <div class="freshness" id="freshness"></div>
-
-    <div class="footer">
-        <a href="https://github.com/tponscr-debug/les-casseroles/issues/new" target="_blank" rel="noopener noreferrer">Signaler une erreur · droit de réponse</a>
-    </div>
-
+    <main class="ticket">
+        <div class="c brand" id="brand">*** LA CASSEROLE ***</div>
+        <div class="c meta" id="sub">Brasserie de la Transparence</div>
+        <hr>
+        <div class="row"><span id="lbl-page">NOMS SUR CETTE PAGE</span><b id="stat-page">—</b></div>
+        <div class="row"><span id="lbl-total">DOSSIERS EN BASE</span><b id="stat-politicians">—</b></div>
+        <p class="status"><span class="dot inactive" id="page-dot"></span><span id="page-text">Impression du ticket…</span></p>
+        <hr>
+        <button class="toggle-btn on" id="toggle-btn"><span class="toggle-indicator"></span><span id="toggle-label">Caisse ouverte</span></button>
+        <label class="opt" for="first-only"><input type="checkbox" id="first-only"><span>Un seul surlignage par nom et par page</span></label>
+        <label class="opt" for="serious-mode"><input type="checkbox" id="serious-mode"><span>Mode sérieux (sans les blagues)</span></label>
+        <hr>
+        <div class="c meta" id="thanks">Revenez quand c'est prescrit.</div>
+        <div class="c meta" id="freshness"></div>
+        <div class="barcode" aria-hidden="true"></div>
+        <div class="c reply"><a href="https://github.com/tponscr-debug/les-casseroles/issues/new" target="_blank" rel="noopener noreferrer">Signaler une erreur · droit de réponse</a></div>
+    </main>
+    <script src="js/copy.js"></script>
     <script src="popup.js"></script>
 </body>
 </html>

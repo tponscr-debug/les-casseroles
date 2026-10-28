@@ -1,9 +1,5 @@
-/* Les Casseroles — ui.css (chargé DANS le Shadow DOM) — v3.0 — Dark / Punchy / Satirique */
-/* Inspiré des composants 21st.dev : spring dialog, staggered items, severity bar */
-/* Typographie : Syne 800 (branding) · Libre Bodoni 700 (noms) · DM Sans (corps) */
+/* Les Casseroles — ui.css (chargé DANS le Shadow DOM) — « L'Addition » : ticket de brasserie. */
 
-
-/* ─── Tokens ──────────────────────────────────────────────────────────────── */
 :host {
     /* Barrière anti-héritage : les !important de l'intérieur du Shadow DOM l'emportent sur ceux de la page. */
     all: initial !important;
@@ -11,382 +7,114 @@
     position: fixed !important;
     top: 0 !important; left: 0 !important; width: 0 !important; height: 0 !important;
     z-index: 2147483646 !important;
-    --c-bg:       #0D0D0D;
-    --c-surface:  #171717;
-    --c-surface2: #1F1F1F;
-    --c-border:   #2A2A2A;
-    --c-red:      #E63946;
-    --c-red-dim:  rgba(230, 57, 70, 0.12);
-    --c-amber:    #F4A261;
-    --c-amber-dim:rgba(244, 162, 97, 0.12);
-    --c-gold:     #D4A853;
-    --c-text:     #F0EDE8;
-    --c-muted:    #888078;
-    --c-muted2:   #555;
+    --paper: #F6F3EA; --ink: #1D1B17; --fade: #6F6A5F; --stamp: #C8281E; --ok: #1E6B35;
+    --mono: 'Casseroles Mono', 'SF Mono', Menlo, Consolas, monospace;
+    --torn: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 14px 100%;
 }
 
-/* ─── Bulle flottante — 21st.dev: Alert with rotate hover ────────────────── */
+/* ─── Bulle : un petit ticket qui dépasse ────────────────────────────────── */
 #casseroles-float-bubble {
     position: fixed;
-    background: var(--c-bg);
-    color: var(--c-text);
-    padding: 9px 16px;
-    border-radius: 8px;
-    border: 1px solid var(--c-border);
-    border-left: 3px solid var(--c-red);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.4);
-    z-index: 2147483645;
     display: none;
-    font-size: 12px;
-    font-family: 'Casseroles DM Sans', sans-serif;
-    font-weight: 700;
-    letter-spacing: 0.03em;
     cursor: pointer;
+    filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.35));
+    animation: casseroles-pop 0.18s ease-out;
+}
+#casseroles-float-bubble .stub {
+    display: block;
+    background: var(--paper);
+    color: var(--ink);
+    font: 700 12px/1.2 var(--mono);
+    letter-spacing: 0.03em;
     white-space: nowrap;
-    pointer-events: auto;
-    transform-origin: bottom center;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-    animation: casseroles-bubble-in 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    padding: 10px 16px 15px;
+    -webkit-mask: var(--torn); mask: var(--torn);
 }
+#casseroles-float-bubble:hover .stub { background: #FFFBEA; }
+#casseroles-float-bubble:focus-visible { outline: 2px solid var(--stamp); outline-offset: 2px; }
+@keyframes casseroles-pop { from { opacity: 0; transform: translateY(8px) rotate(-2deg); } to { opacity: 1; transform: none; } }
 
-/* 21st.dev: rotate(1deg) micro-tilt au hover */
-#casseroles-float-bubble:hover {
-    transform: rotate(1deg) scale(1.02);
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7);
-}
-
-@keyframes casseroles-bubble-in {
-    from { opacity: 0; transform: translateY(8px) scale(0.94); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-/* ─── Modale — 21st.dev: spring bounce entry ─────────────────────────────── */
+/* ─── Fiche : le ticket s'imprime ────────────────────────────────────────── */
 #casseroles-modal {
     position: fixed;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%) scale(0.92) rotate(-1deg);
-    background: var(--c-surface);
-    color: var(--c-text);
-    border-radius: 16px;
-    border: 1px solid var(--c-border);
-    box-shadow:
-        0 40px 100px rgba(0, 0, 0, 0.7),
-        0 0 0 1px rgba(255, 255, 255, 0.04),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    z-index: 2147483646;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(400px, calc(100vw - 24px));
     display: none;
-    width: 460px;
-    max-height: 88vh;
-    font-family: 'Casseroles DM Sans', sans-serif;
-    flex-direction: column;
-    overflow: hidden;
-    transition: opacity 0.25s ease, transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    opacity: 0;
+    filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.55));
 }
+#casseroles-modal.open { display: block; animation: casseroles-print 0.55s steps(18, end) backwards; }
+@keyframes casseroles-print { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
 
-/* ─── En-tête ─────────────────────────────────────────────────────────────── */
-.casseroles-modal-header {
-    background: var(--c-bg);
-    padding: 24px 24px 20px;
-    border-bottom: 1px solid var(--c-border);
+.receipt {
     position: relative;
+    max-height: 86vh;
+    overflow-y: auto;
+    padding: 26px 24px 38px;
+    color: var(--ink);
+    font: 13px/1.5 var(--mono);
+    background: repeating-linear-gradient(0deg, #0000 0 3px, #00000009 3px 4px), var(--paper);
+    -webkit-mask: var(--torn); mask: var(--torn);
+    scrollbar-width: thin;
+    scrollbar-color: var(--fade) transparent;
 }
 
 #casseroles-close-btn {
-    position: absolute;
-    top: 14px;
-    right: 14px;
-    background: var(--c-surface);
-    border: 1px solid var(--c-border);
-    color: var(--c-muted);
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    font-size: 13px;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: background 0.15s, color 0.15s, transform 0.2s;
-    line-height: 1;
-}
-
-#casseroles-close-btn:hover {
-    background: var(--c-red);
-    border-color: var(--c-red);
-    color: #fff;
-    transform: rotate(90deg);
-}
-
-.casseroles-header-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-}
-
-.casseroles-dossier-label {
-    font-family: 'Casseroles DM Sans', sans-serif;
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--c-red);
-}
-
-.casseroles-pot-blend {
-    margin-right: 36px;      /* laisse la place à la croix de fermeture */
-    width: 32px;
-    height: 32px;
-    object-fit: contain;
-    opacity: 0.5;
-    filter: grayscale(1);
-}
-
-.casseroles-modal-name {
-    font-family: 'Casseroles Bodoni', Georgia, serif;
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--c-text);
-    line-height: 1.1;
-    letter-spacing: -0.02em;
-    margin-bottom: 10px;
-}
-
-.casseroles-modal-meta {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.casseroles-role {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--c-muted);
-}
-
-.casseroles-party-pill {
-    padding: 3px 9px;
-    border-radius: 4px;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-}
-
-/* ─── Severity bar — 21st.dev: Statistics Card 15 ────────────────────────── */
-.casseroles-severity {
-    padding: 16px 24px;
-    background: var(--c-bg);
-    border-bottom: 1px solid var(--c-border);
-}
-
-.casseroles-severity-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 10px;
-}
-
-.casseroles-count-number {
-    font-family: 'Casseroles Syne', sans-serif;
-    font-size: 36px;
-    font-weight: 800;
-    color: var(--c-red);
-    line-height: 1;
-    letter-spacing: -0.03em;
-}
-
-.casseroles-count-label {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--c-muted);
-    margin-left: 4px;
-}
-
-.casseroles-severity-pct {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--c-muted);
-    letter-spacing: 0.02em;
-}
-
-.casseroles-severity-track {
-    height: 4px;
-    background: var(--c-border);
-    border-radius: 2px;
-    overflow: hidden;
-}
-
-.casseroles-severity-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--c-amber), var(--c-red));
-    border-radius: 2px;
-    transition: width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-/* ─── Liste — 21st.dev: staggered item reveal ────────────────────────────── */
-#casseroles-items-container {
-    overflow-y: auto;
-    padding: 8px 0 8px;
-    flex: 1;
-}
-
-#casseroles-items-container::-webkit-scrollbar       { width: 4px; }
-#casseroles-items-container::-webkit-scrollbar-track { background: transparent; }
-#casseroles-items-container::-webkit-scrollbar-thumb { background: var(--c-border); border-radius: 2px; }
-
-.casseroles-item {
-    padding: 14px 24px;
-    border-bottom: 1px solid var(--c-border);
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    animation: casseroles-item-in 0.3s ease both;
-}
-
-@keyframes casseroles-item-in {
-    from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: translateY(0);   }
-}
-
-.casseroles-item:last-child { border-bottom: none; }
-
-.casseroles-item-meta {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
-
-.casseroles-tag-year {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--c-muted);
-    letter-spacing: 0.05em;
-    font-family: 'Casseroles DM Sans', sans-serif;
-}
-
-.casseroles-tag-type {
-    font-size: 10px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 4px;
-    letter-spacing: 0.03em;
-}
-
-.casseroles-tag-judicial {
-    background: var(--c-red-dim);
-    color: var(--c-red);
-    border: 1px solid rgba(230, 57, 70, 0.2);
-}
-
-.casseroles-tag-polemique {
-    background: var(--c-amber-dim);
-    color: var(--c-amber);
-    border: 1px solid rgba(244, 162, 97, 0.2);
-}
-
-.casseroles-item-title {
-    font-size: 13px;
-    font-weight: 500;
-    line-height: 1.55;
-    color: var(--c-text);
-}
-
-.casseroles-item-link {
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--c-muted2);
-    text-decoration: none;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    transition: color 0.15s;
+    position: sticky; top: 0; float: right;
+    margin: -14px -10px 0 8px;
+    width: 26px; height: 26px;
+    background: var(--paper); color: var(--ink);
+    border: 2px solid var(--ink);
+    font: 700 12px/1 var(--mono);
     cursor: pointer;
 }
+#casseroles-close-btn:hover { background: var(--ink); color: var(--paper); }
+#casseroles-close-btn:focus-visible, .receipt a:focus-visible, .receipt summary:focus-visible { outline: 2px solid var(--stamp); outline-offset: 2px; }
 
-.casseroles-item-link:hover { color: var(--c-red); }
+.c { text-align: center; }
+.brand { font: 700 19px/1.2 var(--mono); letter-spacing: 0.08em; }
+.meta { color: var(--fade); font-size: 11px; line-height: 1.45; }
+hr { border: 0; border-top: 2px dashed var(--fade); margin: 12px 0; opacity: 0.7; }
+.who { font: 700 22px/1.15 var(--mono); text-transform: uppercase; overflow-wrap: anywhere; }
+.row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.row b { font-weight: 700; }
+.row .right { text-align: right; }
 
-/* ─── Vide ────────────────────────────────────────────────────────────────── */
-.casseroles-empty {
-    padding: 40px 24px;
-    text-align: center;
+.line { margin: 12px 0; }
+.line .txt, .txt { margin: 3px 0 0; color: var(--ink); }
+.empty { text-align: center; color: var(--fade); margin: 14px 0; }
+.meta2 { margin: 3px 0 0; font-size: 11.5px; }
+.ok { color: var(--ok); font-weight: 700; }
+.yr { font-weight: 700; letter-spacing: 0.06em; }
+.line .tag { margin-top: 2px; }
+.side { font-size: 11px; letter-spacing: 0.04em; white-space: nowrap; }
+
+.tag { display: inline-block; border: 2px solid var(--ink); padding: 0 6px; font-weight: 700; font-size: 11px; letter-spacing: 0.03em; text-transform: uppercase; }
+.tag.conv { background: var(--ink); color: var(--paper); }
+.tag.proc { border-style: dashed; }
+.tag.clear { border-color: var(--ok); color: var(--ok); }
+
+.proof { margin-top: 4px; font-size: 11.5px; color: var(--fade); }
+.proof summary { cursor: pointer; color: var(--ink); font-weight: 700; }
+.proof blockquote { margin: 6px 0 0; padding: 6px 10px; border-left: 2px solid var(--ink); background: #0000000a; line-height: 1.45; }
+.src { margin: 4px 0 0; color: var(--fade); font-size: 11.5px; line-height: 1.45; }
+.src a, .reply a { color: var(--ink); text-decoration: underline wavy var(--fade); text-underline-offset: 3px; }
+
+.waiter { margin: 14px 0 4px; padding: 8px 10px; border: 2px dotted var(--fade); }
+.waiter .tag { border-width: 1px; font-size: 10px; }
+
+.total { font-size: 14px; }
+.bar { letter-spacing: -1px; text-align: right; }
+.stamp {
+    display: table; margin: 12px auto 4px; padding: 3px 12px;
+    border: 3px solid var(--stamp); color: var(--stamp);
+    font: 700 15px/1.3 var(--mono); letter-spacing: 0.12em; text-transform: uppercase;
+    transform: rotate(-5deg); opacity: 0.88; mix-blend-mode: multiply;
 }
+.thanks { font-weight: 700; letter-spacing: 0.06em; }
+.barcode { height: 38px; margin: 14px auto 4px; width: 78%; background: repeating-linear-gradient(90deg, var(--ink) 0 2px, #0000 2px 4px, var(--ink) 4px 5px, #0000 5px 9px, var(--ink) 9px 12px, #0000 12px 14px); }
+.reply { margin-top: 10px; font-size: 11px; }
 
-.casseroles-empty-icon { font-size: 32px; margin-bottom: 12px; }
-.casseroles-empty-title {
-    font-family: 'Casseroles Syne', sans-serif;
-    font-size: 18px;
-    font-weight: 800;
-    color: var(--c-text);
-    margin-bottom: 6px;
-}
-.casseroles-empty-sub { font-size: 13px; color: var(--c-muted); line-height: 1.5; }
-
-/* ─── Citation satirique ──────────────────────────────────────────────────── */
-.casseroles-satirical {
-    padding: 16px 24px;
-    background: var(--c-surface2);
-    border-top: 1px solid var(--c-border);
-    font-family: 'Casseroles Bodoni', Georgia, serif;
-    font-style: italic;
-    font-size: 13px;
-    color: var(--c-muted);
-    line-height: 1.6;
-    text-align: center;
-}
-
-/* ─── Footer ──────────────────────────────────────────────────────────────── */
-.casseroles-modal-footer {
-    padding: 12px 24px;
-    border-top: 1px solid var(--c-border);
-    text-align: center;
-    background: var(--c-bg);
-}
-
-.casseroles-report-link {
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--c-muted2);
-    text-decoration: none;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    transition: color 0.15s;
-    cursor: pointer;
-}
-.casseroles-report-link:hover { color: var(--c-red); }
-
-/* ─── Accessibilité ───────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-    #casseroles-float-bubble,
-    #casseroles-modal,
-    .casseroles-item,
-    .casseroles-rough-highlight::before {
-        animation: none !important;
-        transition: none !important;
-    }
+    #casseroles-float-bubble, #casseroles-modal.open { animation: none !important; }
 }
-
-/* ─── Statuts juridiques & preuves (v3) ───────────────────────────────────── */
-.casseroles-chip { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; letter-spacing: 0.03em; border: 1px solid transparent; }
-.casseroles-chip-final  { background: #E63946; color: #fff; }
-.casseroles-chip-convict{ background: var(--c-red-dim); color: var(--c-red); border-color: rgba(230,57,70,.35); }
-.casseroles-chip-proc   { background: rgba(244,162,97,.14); color: var(--c-amber); border-color: rgba(244,162,97,.3); }
-.casseroles-chip-clear  { background: rgba(80,200,120,.12); color: #5fd38d; border-color: rgba(80,200,120,.3); }
-.casseroles-chip-polem  { background: var(--c-amber-dim); color: var(--c-amber); border-color: rgba(244,162,97,.2); }
-.casseroles-verif { font-size: 10px; font-weight: 700; color: var(--c-muted); letter-spacing: .03em; }
-.casseroles-verif.ok { color: #5fd38d; }
-.casseroles-breakdown { margin-top: 10px; font-size: 11px; color: var(--c-muted); }
-.casseroles-proof { font-size: 11px; color: var(--c-muted); }
-.casseroles-proof summary { cursor: pointer; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; font-size: 10px; color: var(--c-muted2); }
-.casseroles-proof blockquote { margin: 6px 0 0; padding: 8px 10px; border-left: 2px solid var(--c-gold); background: var(--c-surface2); line-height: 1.5; font-style: italic; }
-.casseroles-sources { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; font-size: 10px; color: var(--c-muted2); }
-.casseroles-sources > span { text-transform: uppercase; letter-spacing: .06em; font-weight: 700; }
-.casseroles-unsourced { color: var(--c-amber); }
-.casseroles-humour-tag { display: block; font-family: 'Casseroles DM Sans', sans-serif; font-style: normal; font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: var(--c-muted2); margin-bottom: 4px; }
-.casseroles-checked { display: block; font-size: 10px; color: var(--c-muted2); margin-bottom: 6px; }
-#casseroles-close-btn:focus-visible, .casseroles-item-link:focus-visible, .casseroles-proof summary:focus-visible { outline: 2px solid var(--c-red); outline-offset: 2px; }

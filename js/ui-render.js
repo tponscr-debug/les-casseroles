@@ -1,35 +1,26 @@
-// Les Casseroles — rendu HTML de la modale (fonctions pures, testables sous Node).
+// Les Casseroles — rendu HTML de la fiche « L'Addition » (fonctions pures, testables sous Node).
 // Toute valeur issue des données passe par escapeHtml / safeUrl : aucune injection possible.
 (() => {
     const NS = (globalThis.Casseroles = globalThis.Casseroles || {});
     const { escapeHtml: esc, safeUrl, toTitleCase } = NS.text;
-    const { affairsOf } = NS.data;
+    const { affairsOf, LEGAL } = NS.data;
+    const { get: copyOf, hash } = NS.copy;
 
-    const PILL_COLORS = [
-        { bg: '#1E3A5F', text: '#E8D5A3' }, { bg: '#8B1A1A', text: '#F5E6E6' },
-        { bg: '#1A4731', text: '#C8E6C9' }, { bg: '#4A3728', text: '#F5DEB3' },
-    ];
-    const pillStyle = (party) => {
-        if (!party) return { bg: '#3A3530', text: '#9A9088' };
-        let hash = 0;
-        for (let i = 0; i < party.length; i++) hash = party.charCodeAt(i) + ((hash << 5) - hash);
-        return PILL_COLORS[Math.abs(hash) % PILL_COLORS.length];
-    };
-
-    // Libellés juridiquement prudents : présomption d'innocence explicite, définitivité jamais présumée.
+    // Libellés juridiquement prudents, SOBRES dans les deux modes : présomption d'innocence explicite,
+    // définitivité jamais présumée. Les blagues vivent ailleurs (copy.js), jamais ici.
     const statusInfo = (item) => {
         switch (item.status) {
             case 'condamne':
-                if (item.final === true)  return { cls: 'final',   label: '⚖ Condamnation définitive', rank: 5 };
-                if (item.final === false) return { cls: 'convict', label: '⚖ Condamné · non définitif', rank: 4 };
-                return { cls: 'convict', label: '⚖ Condamné · caractère définitif non établi', rank: 4 };
-            case 'mis_en_examen': return { cls: 'proc',  label: '⚖ Mis en examen · présumé innocent', rank: 3 };
-            case 'renvoye':       return { cls: 'proc',  label: '⚖ Renvoyé en procès · présumé innocent', rank: 3 };
-            case 'enquete':       return { cls: 'proc',  label: '⚖ Enquête · présumé innocent', rank: 2 };
-            case 'mise_en_cause': return { cls: 'proc',  label: '⚖ Mise en cause · présumé innocent', rank: 2 };
-            case 'relaxe':        return { cls: 'clear', label: '✓ Relaxé', rank: 1 };
-            case 'non_lieu':      return { cls: 'clear', label: '✓ Non-lieu', rank: 1 };
-            default:              return { cls: 'polem', label: '🔥 Polémique', rank: 0 };
+                if (item.final === true)  return { cls: 'final',   tag: 'conv',  label: 'Condamnation définitive', rank: 5 };
+                if (item.final === false) return { cls: 'convict', tag: 'conv',  label: 'Condamné · non définitif', rank: 4 };
+                return { cls: 'convict', tag: 'conv', label: 'Condamné · caractère définitif non établi', rank: 4 };
+            case 'mis_en_examen': return { cls: 'proc',  tag: 'proc',  label: 'Mis en examen · présumé innocent', rank: 3 };
+            case 'renvoye':       return { cls: 'proc',  tag: 'proc',  label: 'Renvoyé en procès · présumé innocent', rank: 3 };
+            case 'enquete':       return { cls: 'proc',  tag: 'proc',  label: 'Enquête · présumé innocent', rank: 2 };
+            case 'mise_en_cause': return { cls: 'proc',  tag: 'proc',  label: 'Mise en cause · présumé innocent', rank: 2 };
+            case 'relaxe':        return { cls: 'clear', tag: 'clear', label: 'Relaxé', rank: 1 };
+            case 'non_lieu':      return { cls: 'clear', tag: 'clear', label: 'Non-lieu', rank: 1 };
+            default:              return { cls: 'polem', tag: '',      label: 'Polémique', rank: 0 };
         }
     };
 
@@ -37,23 +28,13 @@
         const c = { definitive: 0, convicted: 0, procedures: 0, cleared: 0, polemics: 0 };
         for (const it of items) {
             const { cls } = statusInfo(it);
-            if (cls === 'final') c.definitive++;
-            else if (cls === 'convict') c.convicted++;
-            else if (cls === 'proc') c.procedures++;
-            else if (cls === 'clear') c.cleared++;
-            else c.polemics++;
+            if (cls === 'final') c.definitive++; else if (cls === 'convict') c.convicted++;
+            else if (cls === 'proc') c.procedures++; else if (cls === 'clear') c.cleared++; else c.polemics++;
         }
-        const score = 5 * c.definitive + 3 * c.convicted + 1.5 * c.procedures + 0.5 * c.polemics;
-        const label = c.definitive ? '🔴 Très grillé' : c.convicted ? '🟠 Bien grillé'
-            : c.procedures ? '🟡 Sur le feu' : '🟢 Peu grillé';
-        const parts = [
-            [c.definitive, 'condamnation définitive', 'condamnations définitives'],
-            [c.convicted, 'condamnation non définitive', 'condamnations non définitives'],
-            [c.procedures, 'procédure en cours', 'procédures en cours'],
-            [c.cleared, 'relaxe / non-lieu', 'relaxes / non-lieux'],
-            [c.polemics, 'polémique', 'polémiques'],
-        ].filter(([n]) => n > 0).map(([n, one, many]) => `${n} ${n > 1 ? many : one}`);
-        return { ...c, score, pct: Math.min(100, Math.round((score / 12) * 100)), label, breakdown: parts.join(' · ') };
+        const level = c.definitive ? 'final' : c.convicted ? 'convict' : c.procedures ? 'proc' : c.polemics ? 'polemic' : 'none';
+        const blocks = { none: 0, polemic: 2, proc: 3, convict: 4, final: 7 }[level];
+        const judicial = items.filter((i) => LEGAL.has(i.status)).length;
+        return { ...c, level, blocks, judicial, legal: c.definitive + c.convicted + c.procedures };
     };
 
     const hostOf = (url) => { try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return ''; } };
@@ -62,75 +43,84 @@
         const seen = new Set();
         const links = (item.sources || []).map((s) => ({ url: safeUrl(s.url), label: s.kind === 'wikipedia' ? 'Wikipédia (révision citée)' : (s.outlet || hostOf(s.url)) }))
             .filter((s) => s.url && !seen.has(s.url) && seen.add(s.url)).slice(0, 4)
-            .map((s) => `<a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer" class="casseroles-item-link">${esc(s.label)} ↗</a>`);
-        if (links.length) return `<div class="casseroles-sources"><span>Sources</span>${links.join('')}</div>`;
+            .map((s) => `<a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.label)}</a>`);
+        if (links.length) return `<p class="src">Sources : ${links.join(' · ')}</p>`;
         const q = `https://www.google.com/search?q=${encodeURIComponent(`${name} ${item.title}`)}`;
-        return `<div class="casseroles-sources"><span class="casseroles-unsourced">Non sourcé</span>` +
-               `<a href="${esc(q)}" target="_blank" rel="noopener noreferrer" class="casseroles-item-link">Chercher dans la presse ↗</a></div>`;
+        return `<p class="src">Non sourcé · <a href="${esc(q)}" target="_blank" rel="noopener noreferrer">chercher dans la presse</a></p>`;
     };
 
-    const renderItem = (item, index, name) => {
+    const renderLine = (item, name, T) => {
         const info = statusInfo(item);
-        const verif = item.verification === 'verified' ? '<span class="casseroles-verif ok">✓ Vérifié</span>'
-            : item.verification === 'sourced' ? '<span class="casseroles-verif">Sourcé</span>' : '';
+        const verif = item.verification === 'verified' ? '<span class="ok">✓ VÉRIFIÉ</span>'
+            : item.verification === 'sourced' ? '<span class="ok">SOURCÉ</span>' : '';
         const proof = item.evidence
-            ? `<details class="casseroles-proof"><summary>Voir la preuve citée</summary><blockquote>« ${esc(item.evidence)} »</blockquote></details>` : '';
+            ? `<details class="proof"><summary>preuve citée</summary><blockquote>« ${esc(item.evidence)} »</blockquote></details>` : '';
         return `
-            <div class="casseroles-item" style="animation-delay:${index * 0.06}s">
-                <div class="casseroles-item-meta">
-                    <span class="casseroles-tag-year">${esc(String(item.year || '?').substring(0, 4))}</span>
-                    <span class="casseroles-chip casseroles-chip-${info.cls}">${esc(info.label)}</span>${verif}
-                </div>
-                <div class="casseroles-item-title">${esc(item.title)}</div>
-                ${proof}${renderSources(item, name)}
+            <div class="line">
+                <div class="row"><span class="yr">${esc(String(item.year || '?').substring(0, 4))}</span><b class="side">${esc(T.side[info.cls])}</b></div>
+                <span class="tag ${esc(info.tag)}">${esc(info.label)}</span>
+                <p class="txt">${esc(item.title)}</p>
+                ${verif ? `<p class="meta2">${verif}</p>` : ''}${proof}${renderSources(item, name)}
             </div>`;
     };
 
-    const formatDate = (iso) => { const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }); };
+    // Un seul tampon n'est exact que pour UNE affaire ; au-delà il renvoie aux lignes (un dossier mixte ne doit pas se lire d'un coup d'œil faux).
+    const stampOf = (items) => {
+        const legal = items.filter((i) => LEGAL.has(i.status) && i.status !== 'relaxe' && i.status !== 'non_lieu');
+        if (legal.length === 0) return '';
+        if (legal.length > 1) return 'Statut : voir chaque ligne';
+        const i = legal[0];
+        if (i.status !== 'condamne') return 'Présumé innocent';
+        return i.final === true ? 'Définitive' : i.final === false ? 'Non définitif' : 'Définitif non établi';
+    };
+    const bar = (n) => '▓'.repeat(n) + '░'.repeat(7 - n);
+    const formatDate = (d, opts) => d.toLocaleDateString('fr-FR', opts);
 
-    // opts : { potUrl, meta, reportUrl }
+    // opts : { humor, potUrl, meta, reportUrl, now }
     const renderModal = (name, entry, opts = {}) => {
+        const T = copyOf(opts.humor);
+        const now = opts.now || new Date();
         const items = affairsOf(entry).sort((a, b) =>
             statusInfo(b).rank - statusInfo(a).rank || String(b.year).localeCompare(String(a.year)));
         const sum = summarize(items);
+        const hasJudicial = sum.judicial > 0;
+        const checkedIso = entry.checked_at || (opts.meta && opts.meta.verified_at);
+        const checked = checkedIso && !isNaN(new Date(checkedIso)) ? formatDate(new Date(checkedIso), { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
+        const stamp = stampOf(items);
+        // Le mot du serveur (humour par personne) : jamais sur un dossier judiciaire, jamais en mode sérieux.
+        const waiter = T.waiter && entry.satirical_comment && !hasJudicial
+            ? `<div class="waiter"><span class="tag">${esc(T.waiter)}</span><p class="txt">« ${esc(entry.satirical_comment)} »</p></div>` : '';
+        const lines = items.length ? items.map((it) => renderLine(it, name, T)).join('')
+            : `<p class="txt empty">${esc(T.empty)}</p>`;
         const party = entry.party || 'Sans étiquette';
-        const pill = pillStyle(entry.party);
-        // L'humour ne s'invite jamais sur un dossier judiciaire.
-        const humour = entry.satirical_comment && !(sum.definitive || sum.convicted || sum.procedures)
-            ? `<div class="casseroles-satirical"><span class="casseroles-humour-tag">Humour</span>« ${esc(entry.satirical_comment)} »</div>` : '';
-        const checked = formatDate(entry.checked_at || (opts.meta && opts.meta.verified_at));
-        const body = items.length
-            ? `<div id="casseroles-items-container">${items.map((it, i) => renderItem(it, i, name)).join('')}</div>`
-            : `<div class="casseroles-empty"><div class="casseroles-empty-icon">✨</div><div class="casseroles-empty-title">Casier vierge</div>
-               <div class="casseroles-empty-sub">Aucune affaire vérifiée à ce jour.</div></div>`;
+        const ticketNo = `${String(hash(name) % 10000).padStart(4, '0')}-${String(items.length).padStart(2, '0')}${String(sum.judicial).padStart(2, '0')}`;
+        const thanks = hasJudicial ? [T.thanksJudicial, T.thanksJudicialSub] : [T.thanks, T.thanksSub];
+
         return `
-            <div class="casseroles-modal-header">
-                <button id="casseroles-close-btn" aria-label="Fermer">✕</button>
-                <div class="casseroles-header-top">
-                    <span class="casseroles-dossier-label">Dossier public · sources citées</span>
-                    ${opts.potUrl ? `<img src="${esc(opts.potUrl)}" alt="" class="casseroles-pot-blend" aria-hidden="true">` : ''}
-                </div>
-                <div class="casseroles-modal-name">${esc(toTitleCase(name))}</div>
-                <div class="casseroles-modal-meta">
-                    <span class="casseroles-role">${esc(entry.role || 'Personnalité politique')}</span>
-                    <span class="casseroles-party-pill" style="background:${pill.bg};color:${pill.text};">${esc(party)}</span>
-                </div>
-            </div>
-            <div class="casseroles-severity">
-                <div class="casseroles-severity-top">
-                    <div><span class="casseroles-count-number">${items.length}</span>
-                    <span class="casseroles-count-label"> affaire${items.length > 1 ? 's' : ''} documentée${items.length > 1 ? 's' : ''}</span></div>
-                    <span class="casseroles-severity-pct">${esc(sum.label)}</span>
-                </div>
-                <div class="casseroles-severity-track"><div class="casseroles-severity-fill" style="width:${sum.pct}%"></div></div>
-                <div class="casseroles-breakdown">${esc(sum.breakdown)}</div>
-            </div>
-            ${body}${humour}
-            <div class="casseroles-modal-footer">
-                ${checked ? `<span class="casseroles-checked">Vérifié le ${esc(checked)}</span>` : ''}
-                ${opts.reportUrl ? `<a href="${esc(opts.reportUrl)}" target="_blank" rel="noopener noreferrer" class="casseroles-report-link">Signaler une erreur · droit de réponse</a>` : ''}
-            </div>`;
+            <button id="casseroles-close-btn" aria-label="Fermer">✕</button>
+            <div class="c brand">${esc(T.brand)}</div>
+            <div class="c meta">${esc(T.sub)}${T.sub2 ? `<br>${esc(T.sub2)}` : ''}</div>
+            <hr>
+            <div class="row"><span>${esc(T.table || 'DOSSIER PUBLIC')}</span><span>${esc(formatDate(now, { day: '2-digit', month: '2-digit', year: '2-digit' }))}</span></div>
+            <hr>
+            <div class="who">${esc(toTitleCase(name))}</div>
+            <div class="meta">${esc(entry.role || 'Personnalité politique')}<br>${esc(party)}</div>
+            <hr>
+            ${lines}${waiter}
+            <hr>
+            <div class="row total"><b>${esc(T.total)}</b><b>${items.length} affaire${items.length > 1 ? 's' : ''}</b></div>
+            <div class="row"><span>${esc(T.judicial)}</span><span>${sum.judicial}</span></div>
+            ${T.tva ? `<div class="row"><span>${esc(T.tva)}</span><span>${esc(T.tvaValue)}</span></div>` : ''}
+            ${hasJudicial ? `<div class="row"><span>${esc(T.service)}</span><span class="right">${esc(T.serviceValue)}</span></div>` : ''}
+            <div class="row"><span>${esc(T.cuisson)}</span><span class="bar">${bar(sum.blocks)} <b>${esc(T.levels[sum.level])}</b></span></div>
+            ${stamp ? `<span class="stamp">${esc(stamp)}</span>` : ''}
+            <hr>
+            <div class="c thanks">${esc(thanks[0])}</div>
+            <div class="c meta">${esc(thanks[1])}${T.guarantee && hasJudicial ? `<br>${esc(T.guarantee)}` : ''}</div>
+            <div class="barcode" aria-hidden="true"></div>
+            <div class="c meta">N° ${esc(ticketNo)}${checked ? ` · vérifié le ${esc(checked)}` : ''}${T.foot && !hasJudicial ? `<br>${esc(T.foot)}` : ''}</div>
+            ${opts.reportUrl ? `<div class="c reply"><a href="${esc(opts.reportUrl)}" target="_blank" rel="noopener noreferrer">${esc(T.reply)}</a></div>` : ''}`;
     };
 
-    NS.render = { statusInfo, summarize, renderItem, renderModal, pillStyle };
+    NS.render = { statusInfo, summarize, renderLine, renderModal };
 })();

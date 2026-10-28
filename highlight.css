@@ -1,30 +1,17 @@
 /* Les Casseroles — surlignage dans la page hôte (seule feuille injectée dans le DOM du site). */
-/* Valeurs littérales : on ne pose AUCUNE variable :root dans la page. */
-/* ─── Surlignage ──────────────────────────────────────────────────────────── */
+/* Surligneur « marqueur » sous le texte : lisible sur fond clair comme sombre, aucune variable :root posée. */
 .casseroles-rough-highlight {
-    position: relative;
     cursor: pointer;
     color: inherit !important;
     text-decoration: none !important;
-    font-weight: 700 !important;
-    border-bottom: 2px solid #D4A853 !important;
-    display: inline;
-    padding-bottom: 1px;
-    transition: color 0.15s;
+    background: linear-gradient(transparent 64%, rgba(255, 214, 0, 0.6) 64%) !important;
+    border-bottom: 2px dotted #D4A700 !important;
+    padding: 0 1px;
+    transition: background-color 0.15s;
 }
 
-.casseroles-rough-highlight:focus-visible { outline: 2px solid #E63946; outline-offset: 2px; border-radius: 2px; }
+.casseroles-rough-highlight:hover { background: linear-gradient(transparent 40%, rgba(255, 214, 0, 0.55) 40%) !important; }
 
-.casseroles-rough-highlight::before {
-    content: '';
-    position: absolute;
-    inset: -2px -4px 0;
-    background: rgba(230, 57, 70, 0.07);
-    border-radius: 3px;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    pointer-events: none;
-}
+.casseroles-rough-highlight:focus-visible { outline: 2px solid #C8281E; outline-offset: 2px; border-radius: 2px; }
 
-.casseroles-rough-highlight:hover::before { opacity: 1; }
-
+@media (prefers-reduced-motion: reduce) { .casseroles-rough-highlight { transition: none !important; } }

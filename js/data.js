@@ -5,7 +5,7 @@
     const NS = (globalThis.Casseroles = globalThis.Casseroles || {});
     const { normalize } = NS.text;
 
-    const state = { map: new Map(), enabled: true, firstOnly: false, meta: null };
+    const state = { map: new Map(), enabled: true, firstOnly: false, humor: 'funny', meta: null };
     const LEGAL = new Set(['condamne', 'mis_en_examen', 'renvoye', 'relaxe', 'non_lieu', 'enquete', 'mise_en_cause']);
     const LEGAL_TITLE = /condamn|coupable|relax|acquitt|non-?lieu|mis(e)? en examen|renvoy|inéligib|garde à vue|perquisition|plainte|parquet|enquête|information judiciaire|instruction|procès|tribunal|cassation|sursis|prison|amende|accus|soupçon|mise? en cause|détourn|fraud|corrupt|escroqu|abus de|favoritisme|harcèlement|agression|violence/i;
 
